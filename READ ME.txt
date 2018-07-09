@@ -1,4 +1,4 @@
-Version: 0.5.0 (Beta)
+Version: (Beta)
 
 TO DO:
   !!!:
@@ -14,7 +14,4 @@ TO DO:
 
   !:
 	Create a file save and load class
-	Sounds?
-
-FEATURES:
-	System based architecture
+	Sounds
