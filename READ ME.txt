@@ -1,0 +1,20 @@
+Version: 0.5.0 (Beta)
+
+TO DO:
+  !!!:
+	Fight logic, handled in GameLogic, don't use a manager class
+	Finish all action/ability types implementation
+	Finish sprites: dummy sprites, spritesheets, AI implementation
+	GUI: in game buttons, display panels, status effect icons, pause/start menu
+
+  !!:
+	AI: movement, ability usage (animation type things, text bubbles, cut scenes)
+	Background for maps
+	Finish full tile-set: brush cover in lower left, volcano top right, and whatever else
+
+  !:
+	Create a file save and load class
+	Sounds?
+
+FEATURES:
+	System based architecture
