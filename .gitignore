@@ -1,0 +1,11 @@
+
+# Xml files from pycharm editor #
+*.iml
+
+*.xml
+
+
+# Python precompiled stuff #
+*.pyc
+
+__pycache__
