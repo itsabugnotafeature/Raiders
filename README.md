@@ -6,6 +6,6 @@ of tanking a boss, reacting to their abilities and killing them before they kill
 
 Dependencies:
 	pygame:
-		available for download at https://www.pygame.org/download.shtml
+		available for download at https://www.pygame.org/download.shtml or through pip
 
 Version: (Beta)
