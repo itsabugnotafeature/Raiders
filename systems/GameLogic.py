@@ -7,9 +7,10 @@ import scripts.animations
 
 from scripts import Astar as Astar
 from scripts import tools
+from systems.BaseSystem import BaseSystem
 
 
-class Logic:
+class Logic(BaseSystem):
 
     def __init__(self, *args, **kwargs):
         self.Engine = None

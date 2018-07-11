@@ -2,9 +2,10 @@ from scripts.variables.localvars import *
 import scripts.map_engine
 from scripts.Colors import Color
 import scripts.tools
+from systems.BaseSystem import BaseSystem
 
 
-class Renderer:
+class Renderer(BaseSystem):
 
     def __init__(self):
         self.Engine = None

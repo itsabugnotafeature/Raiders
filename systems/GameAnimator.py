@@ -1,9 +1,10 @@
 from scripts.variables.localvars import *
 import scripts.animations
+from systems.BaseSystem import BaseSystem
 
 
 # TODO: add a combat idle animation, revert changes to spritesheets
-class Animator:
+class Animator(BaseSystem):
 
     def __init__(self):
         self.animation_dict = {}

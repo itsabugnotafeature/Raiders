@@ -1,10 +1,6 @@
 import math
 
-import GameGUI
-import GameLogic
-import GameAnimator
-import GameRenderer
-import GameSound
+from systems import GameAnimator, GameGUI, GameLogic, GameRenderer, GameSound
 import scripts.sprite_class
 
 from scripts.variables.localvars import *

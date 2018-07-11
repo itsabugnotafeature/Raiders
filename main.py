@@ -1,7 +1,5 @@
+from systems import GameGUI, GameLogic, GameRenderer
 import GameEngine
-import GameLogic
-import GameGUI
-import GameRenderer
 import pygame
 
 pygame.init()

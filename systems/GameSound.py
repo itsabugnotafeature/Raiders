@@ -1,7 +1,8 @@
 from scripts.variables.localvars import *
+from systems.BaseSystem import BaseSystem
 
 
-class GameSound:
+class GameSound(BaseSystem):
 
     def __init__(self):
         self.Engine = None

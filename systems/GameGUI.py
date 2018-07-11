@@ -2,9 +2,10 @@ import scripts.gui_elements
 import scripts.tools
 from scripts.Colors import Color
 from scripts.variables.localvars import *
+from systems.BaseSystem import BaseSystem
 
 
-class GUI:
+class GUI(BaseSystem):
 
     def __init__(self):
         self.Engine = None
