@@ -90,7 +90,9 @@ class Renderer(BaseSystem):
         if not self.paused:
             self.Engine.display_window.fill(Color.Wheat)
 
-            self.Engine.display_window.blit(self.terrain, self.game_vars[BOARD_OFFSET])
+            offset = (self.game_vars[BOARD_OFFSET][0]+self.game_vars[GRID_OFFSET][0],
+                      self.game_vars[BOARD_OFFSET][1]+self.game_vars[GRID_OFFSET][1])
+            self.Engine.display_window.blit(self.terrain, offset)
 
             for surf in self.surf_dict0:
                 for spot in self.surf_dict0[surf]:
@@ -98,8 +100,8 @@ class Renderer(BaseSystem):
 
             for sprite in self.game_vars[SPRITE_LIST]:
                 self.Engine.display_window.blit(sprite.draw(),
-                                                (sprite.pos[0] * 80 + self.game_vars[BOARD_OFFSET][0] + sprite.offset[0],
-                                                sprite.pos[1] * 80 + self.game_vars[BOARD_OFFSET][1] + sprite.offset[1]))
+                                                (sprite.pos[0] * 80 + offset[0] + sprite.offset[0],
+                                                sprite.pos[1] * 80 + offset[1] + sprite.offset[1]))
 
             for surf in self.surf_dict1:
                 for spot in self.surf_dict1[surf]:
@@ -115,8 +117,7 @@ class Renderer(BaseSystem):
                 for spot in self.surf_dict3[surf]:
                     self.Engine.display_window.blit(surf, spot)
 
-        self.Engine.display_window.blit(self.Engine.font.render(str(round(self.game_vars[FPS], 1)),
-                                                                0, Color.Red), (0, 0))
+        self.display_debug_info()
 
         self.Engine.display_window.blit(self.cursor_img, pygame.mouse.get_pos())
 
@@ -132,12 +133,15 @@ class Renderer(BaseSystem):
             pygame.display.update((width, 0, 400, self.Engine.window_height))
             mousex, mousey = pygame.mouse.get_pos()
             pygame.display.update((mousex-100, mousey-100, 200, 200))
-            pygame.display.update((0, 0, 100, 20))
+            pygame.display.update((0, 0, 300, 200))
 
     def do_pause_screencap(self):
         self.Engine.display_window.fill(Color.Wheat)
 
-        self.Engine.display_window.blit(self.terrain, self.game_vars[BOARD_OFFSET])
+        offset = (self.game_vars[BOARD_OFFSET][0] + self.game_vars[GRID_OFFSET][0],
+                  self.game_vars[BOARD_OFFSET][1] + self.game_vars[GRID_OFFSET][1])
+
+        self.Engine.display_window.blit(self.terrain, offset)
 
         for surf in self.surf_dict0:
             for spot in self.surf_dict0[surf]:
@@ -145,9 +149,9 @@ class Renderer(BaseSystem):
 
         for sprite in self.game_vars[SPRITE_LIST]:
             self.Engine.display_window.blit(sprite.draw(),
-                                            (sprite.pos[0] * 80 + self.game_vars[BOARD_OFFSET][0] +
+                                            (sprite.pos[0] * 80 + offset[0] +
                                              sprite.offset[0],
-                                             sprite.pos[1] * 80 + self.game_vars[BOARD_OFFSET][1] +
+                                             sprite.pos[1] * 80 + offset[1] +
                                              sprite.offset[1]))
 
         for surf in self.surf_dict1:
@@ -163,3 +167,15 @@ class Renderer(BaseSystem):
         self.pause_frame.blit(self.pause_layer, (0, 0))
         self.Engine.display_window.blit(self.pause_frame, (0, 0))
         pygame.display.flip()
+
+    def display_debug_info(self):
+        if self.game_vars[DEBUG]:
+            self.Engine.display_window.blit(self.Engine.font.render("FPS: "+str(round(self.game_vars[FPS], 1)),
+                                                                    0, Color.Red), (0, 0))
+            self.Engine.display_window.blit(self.Engine.font.render("Dimensions: "+str((self.Engine.window_width,
+                                                                    self.Engine.window_height)),
+                                                                    0, Color.Red), (0, 50))
+            self.Engine.display_window.blit(self.Engine.font.render("RMOUSE: "+str(self.Engine.game_vars[RMOUSE_POS]),
+                                                                    0, Color.Red), (0, 100))
+            self.Engine.display_window.blit(self.Engine.font.render("ARM: "+str(self.Engine.game_vars[ADJUSTED_RMOUSE_POS]),
+                                                                    0, Color.Red), (0, 150))

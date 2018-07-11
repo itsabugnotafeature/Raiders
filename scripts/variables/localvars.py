@@ -41,6 +41,8 @@ PAUSE = 37
 MOUSE_CLICKED = 38
 SCROLL_UP = 39
 SCROLL_DOWN = 40
+DEBUG = 42
+GRID_OFFSET = 43
 
 """
 Directions for the sprite facing variable

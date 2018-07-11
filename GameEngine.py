@@ -18,9 +18,9 @@ class GameEngine:
         self.Clock = pygame.time.Clock()
 
         # Default values for variables
-        self.window_width, self.window_height = 1500, 950
+        self.window_width, self.window_height = pygame.display.list_modes()[0]
         self.display_window = pygame.display.set_mode((self.window_width, self.window_height),
-                                                      pygame.DOUBLEBUF | pygame.RESIZABLE | pygame.SRCALPHA)
+                                                      pygame.FULLSCREEN | pygame.SRCALPHA | pygame.RESIZABLE)
         pygame.display.set_caption("Raiders")
 
         # Container for all variables the systems create.
@@ -31,13 +31,15 @@ class GameEngine:
             scripts.sprite_class.Player("Garrosh", "tank", "warrior.png", (1, 0)),
             scripts.sprite_class.Monster("Infernus", "tank", "warrior.png", (1, 1))
         ], PAUSE: False, QUIT_SEQUENCE: False, GAME_STATE: TURN_RESET, SCROLL_DOWN: False, SCROLL_UP: False,
-            MOUSE_CLICKED: False, SKIP_SEQUENCE: False, FRIENDLY_FIRE: False, TYPING: False
+            MOUSE_CLICKED: False, SKIP_SEQUENCE: False, FRIENDLY_FIRE: False, TYPING: False, DEBUG: True,
+            GRID_OFFSET: (0, -30)
         }
 
         # Using the keyword arguments
         for key, value in kwargs:
             if key == "wind_dim":
-                self.display_window = pygame.display.set_mode(value, pygame.DOUBLEBUF | pygame.RESIZABLE)
+                self.display_window = pygame.display.set_mode(value,
+                                                              pygame.FULLSCREEN | pygame.RESIZABLE | pygame.SRCALPHA)
             elif key == "win_title":
                 pygame.display.set_caption(value)
             elif key == "sprite_list":
@@ -79,6 +81,8 @@ class GameEngine:
                 self.window_width = event.w
                 self.GUI.handle_event(event)
 
+                self.GUI.handle_event(event)
+
             if event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:
                     self.game_vars[MOUSE_CLICKED] = True
@@ -96,16 +100,17 @@ class GameEngine:
             if event.type == pygame.MOUSEMOTION:
                 # Rounds the mouse position to tiles of dimensions TILE_SIZE x TILE_SIZE, i.e. (320, 160)
                 mouse_pos = event.pos
-                mouse_x = math.floor(mouse_pos[0] / self.game_vars[TILE_SIZE])
-                mouse_y = math.floor(mouse_pos[1] / self.game_vars[TILE_SIZE])
+                mouse_x = (mouse_pos[0]-self.game_vars[GRID_OFFSET][0]) // self.game_vars[TILE_SIZE]
+                mouse_y = (mouse_pos[1]-self.game_vars[GRID_OFFSET][1]) // self.game_vars[TILE_SIZE]
                 self.game_vars[RMOUSE_POS] = (mouse_x * self.game_vars[TILE_SIZE], mouse_y * self.game_vars[TILE_SIZE])
+
                 # Adjusted to the actual board position so (0, 0) is at the top left
                 # and the steps are in 1's not 80's
                 # Primarily used for checking sprite positions
                 self.game_vars[ADJUSTED_RMOUSE_POS] = ((self.game_vars[RMOUSE_POS][0] - self.game_vars[BOARD_OFFSET][0])
-                                                       / self.game_vars[TILE_SIZE],
-                                                       (self.game_vars[RMOUSE_POS][1] - self.game_vars[BOARD_OFFSET][1])
-                                                       / self.game_vars[TILE_SIZE])
+                                                       // self.game_vars[TILE_SIZE],
+                                                       (self.game_vars[RMOUSE_POS][1] - self.game_vars[BOARD_OFFSET][1]+60)
+                                                       // self.game_vars[TILE_SIZE])
                 self.GUI.handle_event(event)
 
             if event.type == pygame.KEYDOWN:
@@ -118,6 +123,8 @@ class GameEngine:
                     self.Renderer.handle_event(event)
                 if event.key == pygame.K_q and event.mod & pygame.KMOD_CTRL:
                     self.game_vars[QUIT_SEQUENCE] = True
+                if event.key == pygame.K_d and event.mod & pygame.KMOD_CTRL:
+                    self.game_vars[DEBUG] = not self.game_vars[DEBUG]
                 self.GUI.handle_event(event)
 
             if event.type == pygame.KEYUP:

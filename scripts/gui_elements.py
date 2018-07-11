@@ -46,7 +46,7 @@ class ScrollingTextBox:
 
     def __init__(self, rect, theme, message_cap=40):
 
-        self.position = (rect[0], rect[1])
+        self.relative_position = (rect[0], rect[1])
         self.width = rect[2]
         self.height = rect[3]
 
@@ -199,8 +199,8 @@ class ScrollingTextBox:
 
     def update(self, engine):
         mouse_pos = pygame.mouse.get_pos()
-        if self.position[0] <= mouse_pos[0] <= self.position[0] + self.width and \
-                self.position[1] <= mouse_pos[1] <= self.position[1] + self.height:
+        if self.relative_position[0] <= mouse_pos[0] <= self.relative_position[0] + self.width and \
+                self.relative_position[1] <= mouse_pos[1] <= self.relative_position[1] + self.height:
             self.on_hover(engine)
         elif self.hover:
             self.hover = False
@@ -213,7 +213,7 @@ class ScrollingTextBox:
 class InputTextBox:
 
     def __init__(self, rect, theme):
-        self.position = (rect[0], rect[1])
+        self.relative_position = (rect[0], rect[1])
         self.width = rect[2]
         self.height = rect[3]
 
@@ -336,8 +336,8 @@ class InputTextBox:
 
         if event.type == pygame.MOUSEMOTION:
             mouse_pos = event.pos
-            if self.position[0] <= mouse_pos[0] <= self.position[0] + self.width and \
-                    self.position[1] <= mouse_pos[1] <= self.position[1] + self.height:
+            if self.relative_position[0] <= mouse_pos[0] <= self.relative_position[0] + self.width and \
+                    self.relative_position[1] <= mouse_pos[1] <= self.relative_position[1] + self.height:
                 self.on_hover()
             elif self.hover:
                 self.hover = False
@@ -385,7 +385,7 @@ class InputTextBox:
 class Button:
 
     def __init__(self, rect, theme, action=None, action_kwargs={}, text="", style="rounded_gui"):
-        self.position = (rect[0], rect[1])
+        self.relative_position = (rect[0], rect[1])
         self.width = rect[2]
         self.height = rect[3]
 
@@ -404,12 +404,12 @@ class Button:
 
         self.blit_image = self.base_image.copy()
 
-    def set_position(self, pos):
+    def set_relative_position(self, pos):
         assert isinstance(pos, tuple)
-        self.position = pos
+        self.relative_position = pos
 
     def in_bounds(self, pos):
-        if tools.is_in_bounds(pos, (self.position[0], self.position[1], self.width, self.height)):
+        if tools.is_in_bounds(pos, (self.relative_position[0], self.relative_position[1], self.width, self.height)):
             return True
         return False
 

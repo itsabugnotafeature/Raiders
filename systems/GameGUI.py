@@ -68,7 +68,8 @@ class GUI(BaseSystem):
     def is_mouse_on_gui(self):
         mouse_pos = pygame.mouse.get_pos()
         for gui in self.gui_list:
-            if scripts.tools.is_in_bounds(mouse_pos, (gui.position[0], gui.position[1], gui.width, gui.height)):
+            if scripts.tools.is_in_bounds(mouse_pos, (gui.relative_position[0], gui.relative_position[1],
+                                                      gui.width, gui.height)):
                 return True
         return False
 
@@ -132,18 +133,22 @@ class GUI(BaseSystem):
 
     def main_loop(self):
         if self.game_vars[GAME_STATE] == PATHING:
+
+            offset = (self.game_vars[BOARD_OFFSET][0] + self.game_vars[GRID_OFFSET][0],
+                      self.game_vars[BOARD_OFFSET][1] + self.game_vars[GRID_OFFSET][1])
+
             for spot in self.game_vars[MOVABLE_LIST]:
                 make_event(SURFACE, surf=self.pathing_highlight.copy(),
-                           pos=(spot[0] * 80 + self.game_vars[BOARD_OFFSET][0],
-                                spot[1] * 80 + self.game_vars[BOARD_OFFSET][1]), z=0)
+                           pos=(spot[0] * 80 + offset[0],
+                                spot[1] * 80 + offset[1]), z=0)
 
         for gui in self.gui_list:
             gui.update(self.Engine)
 
+        self.make_highlight_tile()
+
         if self.game_vars[GAME_STATE] == ATTACKING:
             self.make_attacking_tiles()
-        elif self.game_vars[GAME_STATE] == PATHING and not self.game_vars[PAUSE]:
-            self.make_pathing_tiles()
         counter = 0
         for sprite in self.game_vars[SPRITE_LIST]:
 
@@ -163,17 +168,21 @@ class GUI(BaseSystem):
 
         for address in self.fight_gui_addresses + self.base_gui_addresses:
             gui = self.gui_list[address]
-            make_event(SURFACE, surf=gui.render(), pos=gui.position, z=1)
+            make_event(SURFACE, surf=gui.render(), pos=gui.relative_position, z=1)
         if self.game_vars[PAUSE]:
             for address in self.pause_gui_addresses:
                 gui = self.gui_list[address]
-                make_event(SURFACE, surf=gui.render(), pos=gui.position, z=3)
+                make_event(SURFACE, surf=gui.render(), pos=gui.relative_position, z=3)
 
     # HELPER FUNCTIONS #
 
     def make_health_bars(self, sprite):
-        pos = (sprite.pos[0] * self.game_vars[TILE_SIZE] + self.game_vars[BOARD_OFFSET][0] + 12,
-               sprite.pos[1] * self.game_vars[TILE_SIZE] + self.game_vars[BOARD_OFFSET][1] + 60)
+
+        offset = (self.game_vars[BOARD_OFFSET][0] + self.game_vars[GRID_OFFSET][0],
+                  self.game_vars[BOARD_OFFSET][1] + self.game_vars[GRID_OFFSET][1])
+
+        pos = (sprite.pos[0] * self.game_vars[TILE_SIZE] + offset[0] + 12,
+               sprite.pos[1] * self.game_vars[TILE_SIZE] + offset[1] + 60)
         surf = pygame.Surface((68, 4))
         surf.fill(Color.Brown)
         health_percentage = sprite.health / sprite.maxhealth
@@ -183,45 +192,58 @@ class GUI(BaseSystem):
         make_event(SURFACE, surf=surf, pos=pos, z=0)
 
     def make_name_plates(self, sprite):
-        pos = (sprite.pos[0] * self.game_vars[TILE_SIZE] + self.game_vars[BOARD_OFFSET][0],
-               sprite.pos[1] * self.game_vars[TILE_SIZE] + self.game_vars[BOARD_OFFSET][1] - 50)
+
+        offset = (self.game_vars[BOARD_OFFSET][0] + self.game_vars[GRID_OFFSET][0],
+                  self.game_vars[BOARD_OFFSET][1] + self.game_vars[GRID_OFFSET][1])
+
+        pos = (sprite.pos[0] * self.game_vars[TILE_SIZE] + offset[0],
+               sprite.pos[1] * self.game_vars[TILE_SIZE] + offset[1] - 50)
         make_event(SURFACE, surf=sprite.name_img, pos=pos, z=1)
 
     def make_attacking_tiles(self):
+
+        offset = (self.game_vars[BOARD_OFFSET][0] + self.game_vars[GRID_OFFSET][0],
+                  self.game_vars[BOARD_OFFSET][1] + self.game_vars[GRID_OFFSET][1])
+
         for sprite in self.game_vars[SPRITE_LIST]:
             if self.game_vars[ADJUSTED_RMOUSE_POS] == sprite.pos:
                 if sprite.type == "player":
                     if self.game_vars[FRIENDLY_FIRE]:
                         make_event(SURFACE, surf=self.friendly_highlight,
-                                   pos=(sprite.pos[0] * 80 + self.game_vars[BOARD_OFFSET][0] + 8,
-                                        sprite.pos[1] * 80 + self.game_vars[BOARD_OFFSET][1] + 6), z=0)
+                                   pos=(sprite.pos[0] * 80 + offset[0] + 8,
+                                        sprite.pos[1] * 80 + offset[1] + 6), z=0)
                 else:
                     make_event(SURFACE, surf=self.fight_highlight,
-                               pos=(sprite.pos[0] * 80 + self.game_vars[BOARD_OFFSET][0] + 8,
-                                    sprite.pos[1] * 80 + self.game_vars[BOARD_OFFSET][1] + 6), z=0)
+                               pos=(sprite.pos[0] * 80 + offset[0] + 8,
+                                    sprite.pos[1] * 80 + offset[1] + 6), z=0)
             else:
                 if sprite.type == "monster":
                     make_event(SURFACE, surf=self.choosing_highlight,
-                               pos=(sprite.pos[0] * 80 + self.game_vars[BOARD_OFFSET][0] + 8,
-                                    sprite.pos[1] * 80 + self.game_vars[BOARD_OFFSET][1] + 6), z=0)
+                               pos=(sprite.pos[0] * 80 + offset[0] + 8,
+                                    sprite.pos[1] * 80 + offset[1] + 6), z=0)
                 elif sprite.type == "player" and self.game_vars[FRIENDLY_FIRE]:
                     make_event(SURFACE, surf=self.choosing_highlight,
-                               pos=(sprite.pos[0] * 80 + self.game_vars[BOARD_OFFSET][0] + 8,
-                                    sprite.pos[1] * 80 + self.game_vars[BOARD_OFFSET][1] + 6), z=0)
+                               pos=(sprite.pos[0] * 80 + offset[0] + 8,
+                                    sprite.pos[1] * 80 + offset[1] + 6), z=0)
 
-    def make_pathing_tiles(self):
-        if self.game_vars[ADJUSTED_RMOUSE_POS] in self.game_vars[MOVABLE_LIST]:
-            make_event(SURFACE, surf=self.move_highlight, pos=self.game_vars[RMOUSE_POS], z=0)
+    def make_highlight_tile(self):
+        if not self.game_vars[PAUSE]:
+            if self.game_vars[ADJUSTED_RMOUSE_POS] in self.game_vars[MOVABLE_LIST]:
+                offset = (self.game_vars[RMOUSE_POS][0]+self.game_vars[GRID_OFFSET][0],
+                         self.game_vars[RMOUSE_POS][1]+self.game_vars[GRID_OFFSET][1])
+                make_event(SURFACE, surf=self.move_highlight, pos=offset, z=0)
 
     def display_pause_gui(self):
         # The number added to self.Engine.window_width should equal the width of the button
         width = (self.Engine.window_width - 400) / 2
         height = 150
+        # TODO: make a subclass for pause buttons
         self.gui_list.append(scripts.gui_elements.Button((width, height + 48, 400, 48), self.GUITheme,
                                                          text="Unpause (Not Implemented)"))
         self.pause_gui_addresses.append(len(self.gui_list) - 1)
         self.gui_list.append(scripts.gui_elements.Button((width, height + 48 * 2 + 16, 400, 48), self.GUITheme,
-                                                         text="(Not Implemented)"))
+                                                         text="Quit", action=make_event,
+                                                         action_kwargs={"type": pygame.QUIT}))
         self.pause_gui_addresses.append(len(self.gui_list) - 1)
         self.gui_list.append(scripts.gui_elements.Button((width, height + 48 * 3 + 32, 400, 48), self.GUITheme,
                                                          text="(Not Implemented)"))
