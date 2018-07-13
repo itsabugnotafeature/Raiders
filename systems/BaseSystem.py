@@ -14,7 +14,7 @@ class BaseSystem:
     def set_up(self):
         pass
 
-    def init(self):
+    def init(self, engine):
         pass
 
     def main_loop(self):

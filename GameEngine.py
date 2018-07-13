@@ -10,7 +10,7 @@ import ast
 
 class GameEngine:
 
-    def __init__(self, logic_system=GameLogic.Logic(), gui_system=GameGUI.GUI(),
+    def __init__(self, window, logic_system=GameLogic.Logic(), gui_system=GameGUI.GUI(),
                  renderer_system=GameRenderer.Renderer(), **kwargs):
 
         # Engine variables (Don't touch)
@@ -18,10 +18,8 @@ class GameEngine:
         self.Clock = pygame.time.Clock()
 
         # Default values for variables
-        self.window_width, self.window_height = pygame.display.list_modes()[0]
-        self.display_window = pygame.display.set_mode((self.window_width, self.window_height),
-                                                      pygame.FULLSCREEN | pygame.SRCALPHA | pygame.RESIZABLE)
-        pygame.display.set_caption("Raiders")
+        self.window_width, self.window_height = window.get_width(), window.get_height()
+        self.display_window = window
 
         # Container for all variables the systems create.
         # Keys are defined in localvars, they are all ints.
@@ -39,7 +37,7 @@ class GameEngine:
         for key, value in kwargs:
             if key == "wind_dim":
                 self.display_window = pygame.display.set_mode(value,
-                                                              pygame.FULLSCREEN | pygame.RESIZABLE | pygame.SRCALPHA)
+                                                              pygame.FULLSCREEN | pygame.RESIZABLE)
             elif key == "win_title":
                 pygame.display.set_caption(value)
             elif key == "sprite_list":
@@ -74,14 +72,15 @@ class GameEngine:
             if event.type == pygame.QUIT:
                 self.game_vars[QUIT_SEQUENCE] = True
 
-            if event.type == pygame.VIDEORESIZE:
-                self.display_window = pygame.display.set_mode((event.w, event.h),
-                                                              pygame.DOUBLEBUF | pygame.RESIZABLE)
-                self.window_height = event.h
-                self.window_width = event.w
-                self.GUI.handle_event(event)
-
-                self.GUI.handle_event(event)
+            # TODO: add support for a windowed mode
+            # if event.type == pygame.VIDEORESIZE:
+            #     self.display_window = pygame.display.set_mode((event.w, event.h),
+            #                                                   pygame.DOUBLEBUF | pygame.RESIZABLE)
+            #     self.window_height = event.h
+            #     self.window_width = event.w
+            #     self.GUI.handle_event(event)
+            #
+            #     self.GUI.handle_event(event)
 
             if event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:
@@ -147,7 +146,7 @@ class GameEngine:
             if event.type == PRINT_LINE:
                 # Is it a command?
                 if event.message.startswith("/"):
-                    self.parse_command_input()
+                    self.parse_command_input(event)
                 else:
                     self.GUI.handle_event(event)
 
