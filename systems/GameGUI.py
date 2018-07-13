@@ -68,7 +68,7 @@ class GUI(BaseSystem):
     def is_mouse_on_gui(self):
         mouse_pos = pygame.mouse.get_pos()
         for gui in self.gui_list:
-            if scripts.tools.is_in_bounds(mouse_pos, (gui.relative_position[0], gui.relative_position[1],
+            if scripts.tools.is_in_bounds(mouse_pos, (gui.position[0], gui.position[1],
                                                       gui.width, gui.height)):
                 return True
         return False
@@ -168,11 +168,11 @@ class GUI(BaseSystem):
 
         for address in self.fight_gui_addresses + self.base_gui_addresses:
             gui = self.gui_list[address]
-            make_event(SURFACE, surf=gui.render(), pos=gui.relative_position, z=1)
+            make_event(SURFACE, surf=gui.render(), pos=gui.position, z=1)
         if self.game_vars[PAUSE]:
             for address in self.pause_gui_addresses:
                 gui = self.gui_list[address]
-                make_event(SURFACE, surf=gui.render(), pos=gui.relative_position, z=3)
+                make_event(SURFACE, surf=gui.render(), pos=gui.position, z=3)
 
     # HELPER FUNCTIONS #
 
