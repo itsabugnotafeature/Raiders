@@ -30,6 +30,8 @@ OUTPUT_CONSOLE = 12
 INPUT_TEXT = 13
 FRIENDLY_FIRE = 14
 TYPING = 15
+GRID_OFFSET = 16
+FULL_SCREEN = 17
 
 # All input events.py past this
 RMOUSE_POS = 33
@@ -42,7 +44,6 @@ MOUSE_CLICKED = 38
 SCROLL_UP = 39
 SCROLL_DOWN = 40
 DEBUG = 42
-GRID_OFFSET = 43
 
 """
 Directions for the sprite facing variable

@@ -432,6 +432,7 @@ class Button:
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONUP:
             if self.in_bounds(event.pos) and self.state != DISABLED:
+                print("button '" + str(hash(self)) + "' executed event")
                 self.use_action()
         elif event.type == pygame.MOUSEMOTION:
             if self.in_bounds(event.pos) and self.state != DISABLED:

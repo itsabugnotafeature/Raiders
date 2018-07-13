@@ -80,6 +80,10 @@ class Renderer(BaseSystem):
             else:
                 self.paused = False
 
+        if event.type == FLSCRN_TOGGLE:
+            self.Engine.display_window.blit(self.pause_frame, (0, 0))
+            pygame.display.flip()
+
     def main_loop(self):
 
         if self.pause_flagged:
@@ -117,7 +121,8 @@ class Renderer(BaseSystem):
                 for spot in self.surf_dict3[surf]:
                     self.Engine.display_window.blit(surf, spot)
 
-        self.display_debug_info()
+        if self.game_vars[DEBUG]:
+            self.display_debug_info()
 
         self.Engine.display_window.blit(self.cursor_img, pygame.mouse.get_pos())
 
@@ -169,13 +174,13 @@ class Renderer(BaseSystem):
         pygame.display.flip()
 
     def display_debug_info(self):
-        if self.game_vars[DEBUG]:
-            self.Engine.display_window.blit(self.Engine.font.render("FPS: "+str(round(self.game_vars[FPS], 1)),
-                                                                    0, Color.Red), (0, 0))
-            self.Engine.display_window.blit(self.Engine.font.render("Dimensions: "+str((self.Engine.window_width,
-                                                                    self.Engine.window_height)),
-                                                                    0, Color.Red), (0, 50))
-            self.Engine.display_window.blit(self.Engine.font.render("RMOUSE: "+str(self.Engine.game_vars[RMOUSE_POS]),
-                                                                    0, Color.Red), (0, 100))
-            self.Engine.display_window.blit(self.Engine.font.render("ARM: "+str(self.Engine.game_vars[ADJUSTED_RMOUSE_POS]),
-                                                                    0, Color.Red), (0, 150))
+        self.Engine.display_window.blit(self.Engine.font.render("FPS: " + str(round(self.game_vars[FPS], 1)),
+                                                                0, Color.Red), (0, 0))
+        self.Engine.display_window.blit(self.Engine.font.render("Dimensions: " + str((self.Engine.window_width,
+                                                                                      self.Engine.window_height)),
+                                                                0, Color.Red), (0, 50))
+        self.Engine.display_window.blit(self.Engine.font.render("RMOUSE: " + str(self.Engine.game_vars[RMOUSE_POS]),
+                                                                0, Color.Red), (0, 100))
+        self.Engine.display_window.blit(
+            self.Engine.font.render("ARM: " + str(self.Engine.game_vars[ADJUSTED_RMOUSE_POS]),
+                                    0, Color.Red), (0, 150))

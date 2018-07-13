@@ -30,7 +30,7 @@ class GameEngine:
             scripts.sprite_class.Monster("Infernus", "tank", "warrior.png", (1, 1))
         ], PAUSE: False, QUIT_SEQUENCE: False, GAME_STATE: TURN_RESET, SCROLL_DOWN: False, SCROLL_UP: False,
             MOUSE_CLICKED: False, SKIP_SEQUENCE: False, FRIENDLY_FIRE: False, TYPING: False, DEBUG: True,
-            GRID_OFFSET: (0, -30)
+            GRID_OFFSET: (0, -30), FULL_SCREEN: True
         }
 
         # Using the keyword arguments
@@ -115,16 +115,16 @@ class GameEngine:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE and not self.game_vars[TYPING] and not self.game_vars[PAUSE] and not self.game_vars[GAME_STATE] == IN_FIGHT:
                     self.game_vars[SKIP_SEQUENCE] = True
-                if event.key == pygame.K_ESCAPE:
-                    self.game_vars[PAUSE] = not self.game_vars[PAUSE]
-                    # TODO: make the Renderer screen-cap after one frame to give other systems time to react
-                    self.GUI.handle_event(event)
-                    self.Renderer.handle_event(event)
                 if event.key == pygame.K_q and event.mod & pygame.KMOD_CTRL:
                     self.game_vars[QUIT_SEQUENCE] = True
                 if event.key == pygame.K_d and event.mod & pygame.KMOD_CTRL:
                     self.game_vars[DEBUG] = not self.game_vars[DEBUG]
-                self.GUI.handle_event(event)
+                if event.key == pygame.K_ESCAPE:
+                    self.game_vars[PAUSE] = not self.game_vars[PAUSE]
+                    self.GUI.handle_event(event)
+                    self.Renderer.handle_event(event)
+                else:
+                    self.GUI.handle_event(event)
 
             if event.type == pygame.KEYUP:
                 self.GUI.handle_event(event)
@@ -152,6 +152,16 @@ class GameEngine:
 
             if event.type == MESSAGE_BANNER:
                 self.GUI.handle_event(event)
+
+            if event.type == FLSCRN_TOGGLE:
+                self.game_vars[FULL_SCREEN] = not self.game_vars[FULL_SCREEN]
+
+                if self.game_vars[FULL_SCREEN]:
+                    self.display_window = pygame.display.set_mode(pygame.display.list_modes()[0], pygame.FULLSCREEN)
+                else:
+                    self.display_window = pygame.display.set_mode(pygame.display.list_modes()[0], pygame.RESIZABLE)
+
+                self.Renderer.handle_event(event)
 
     def update(self):
         self.main_loop()

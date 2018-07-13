@@ -18,6 +18,9 @@ FIGHT_EVENT = 27    # Event dict: subtype=(any of the sub types listed), kwargs(
 MESSAGE_BANNER = 28     # Event dict: message="", color=(R, G, B)/(R, G, B, A)
 """Similar to PRINT_LINE, only this is displayed directly on the screen, not in the textbox"""
 
+FLSCRN_TOGGLE = 29      # Event dict:
+"""Signals GameEngine to switch between fullscreen and windowed mode"""
+
 # FIGHT SUB EVENTS #
 FIGHT_BEGIN = 0     # Signals beginning of fight, creation of buttons // kwargs(fighting_player=player)
 FIGHT_END = 1       # Signals end of fight, destruction of buttons
