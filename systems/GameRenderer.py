@@ -91,6 +91,7 @@ class Renderer(BaseSystem):
             self.pause_flagged = False
             self.paused = True
 
+        # TODO: do everything in a 1/16 scale and then scale up (1 square becomes 20x20)
         if not self.paused:
             self.Engine.display_window.fill(Color.Wheat)
 

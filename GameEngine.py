@@ -157,9 +157,9 @@ class GameEngine:
                 self.game_vars[FULL_SCREEN] = not self.game_vars[FULL_SCREEN]
 
                 if self.game_vars[FULL_SCREEN]:
-                    self.display_window = pygame.display.set_mode(pygame.display.list_modes()[0], pygame.FULLSCREEN)
+                    self.display_window = pygame.display.set_mode((self.window_width, self.window_height), pygame.FULLSCREEN)
                 else:
-                    self.display_window = pygame.display.set_mode(pygame.display.list_modes()[0], pygame.RESIZABLE)
+                    self.display_window = pygame.display.set_mode((self.window_width, self.window_height), pygame.RESIZABLE)
 
                 self.Renderer.handle_event(event)
 
