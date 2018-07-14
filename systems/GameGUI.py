@@ -133,19 +133,11 @@ class GUI(BaseSystem):
 
     def main_loop(self):
         if self.game_vars[GAME_STATE] == PATHING:
-
-            offset = (self.game_vars[BOARD_OFFSET][0] + self.game_vars[GRID_OFFSET][0],
-                      self.game_vars[BOARD_OFFSET][1] + self.game_vars[GRID_OFFSET][1])
-
-            for spot in self.game_vars[MOVABLE_LIST]:
-                make_event(SURFACE, surf=self.pathing_highlight.copy(),
-                           pos=(spot[0] * 80 + offset[0],
-                                spot[1] * 80 + offset[1]), z=0)
+            self.make_pathing_highlight()
+            self.make_highlight_tile()
 
         for gui in self.gui_list:
             gui.update(self.Engine)
-
-        self.make_highlight_tile()
 
         if self.game_vars[GAME_STATE] == ATTACKING:
             self.make_attacking_tiles()
@@ -232,6 +224,15 @@ class GUI(BaseSystem):
                 offset = (self.game_vars[RMOUSE_POS][0]+self.game_vars[GRID_OFFSET][0],
                          self.game_vars[RMOUSE_POS][1]+self.game_vars[GRID_OFFSET][1])
                 make_event(SURFACE, surf=self.move_highlight, pos=offset, z=0)
+
+    def make_pathing_highlight(self):
+        offset = (self.game_vars[BOARD_OFFSET][0] + self.game_vars[GRID_OFFSET][0],
+                  self.game_vars[BOARD_OFFSET][1] + self.game_vars[GRID_OFFSET][1])
+
+        for spot in self.game_vars[MOVABLE_LIST]:
+            make_event(SURFACE, surf=self.pathing_highlight.copy(),
+                       pos=(spot[0] * 80 + offset[0],
+                            spot[1] * 80 + offset[1]), z=0)
 
     def display_pause_gui(self):
         # The number added to self.Engine.window_width should equal the width of the button
