@@ -176,6 +176,9 @@ class GameEngine:
 
     def parse_command_input(self, event):
         parsed_input = event.message.split(" ")
+
+        # Remove any extraneous values from extra spaces
+        parsed_input = list(filter(lambda string: string != "", parsed_input))
         # Is it a simulated input?
         if event.message.startswith("/event "):
 
