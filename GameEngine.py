@@ -184,7 +184,10 @@ class GameEngine:
 
                 # Check if there were parameters passed to the command
                 if len(parsed_input) > 2:
-                    input_pos = ast.literal_eval(parsed_input[2])
+                    try:
+                        input_pos = ast.literal_eval(parsed_input[2])
+                    except SyntaxError:
+                        input_pos = ast.literal_eval(parsed_input[2]+parsed_input[3])
                     make_event(pygame.MOUSEMOTION, pos=input_pos, rel=(0, 0), buttons=[])
                     make_event(pygame.MOUSEBUTTONUP, pos=input_pos, button=1)
                 else:
