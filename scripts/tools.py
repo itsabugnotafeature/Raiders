@@ -4,7 +4,7 @@ Provides some helpful math functions for the game systems
 from scripts.variables.localvars import *
 import pygame
 from scripts.Colors import Color
-
+import random
 
 def tup_round(tuple, digits=0):
     return round(tuple[0], digits), round(tuple[1], digits)
@@ -103,3 +103,23 @@ def get_percentage_color(percentage):
                     Color1[1] + Color2[1],
                     Color1[2] + Color2[2])
     return output_color
+
+
+# Makes a list of numbers,which go from 0 to end or alternatively from start to end, in random order
+def random_list(end, start=0, length=None):
+    base_list = []
+    for i in range(start, end):
+        base_list.append(i)
+    final_list = []
+    if length is None:
+        for i in range(len(base_list)):
+            num = base_list[random.randint(0, len(base_list)-1)]
+            final_list.append(num)
+            base_list.remove(num)
+    else:
+        for i in range(length):
+            num = base_list[random.randint(0, len(base_list) - 1)]
+            final_list.append(num)
+    return final_list
+
+

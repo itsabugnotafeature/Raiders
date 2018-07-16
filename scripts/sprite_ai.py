@@ -37,7 +37,7 @@ class BaseMonsterAI(BaseAI):
             path = a_star(self.sprite.pos, sprite_target.pos, grid)
         else:
             if not path_manager.contains_sprite(self.sprite):
-                path_manager.generate_path(self.sprite, path=self.base_path)
+                path_manager.add_monster(self.sprite, path=self.base_path)
             goal = path_manager.get_next_step(self.sprite)
 
             # If the AI recognizes that it has tried to go here before it reverses the path and tries again

@@ -18,36 +18,48 @@ class PathManager:
             self.path_index_dict[monster] = 0
             self.master_path_dict[monster] = path
         else:
-            self.generate_path(monster)
+            self.generate_random_path(monster)
 
-    def generate_path(self, monster, length=6):
+    def generate_path(self, monster, length=6, no_repeat=False):
 
-        keep_running = 1
-        path = []
         pos = monster.pos
-        while keep_running or len(path) < 2:
-            r = random.randint(0, 3)
-            new_pos = self.grid.neighbors(pos)[r]
-            path.append(new_pos)
-            pos = new_pos
-            keep_running = random.randint(0, length-1)
+        path = [pos]
+        # TODO: find a way to make a path with no repetition
 
         self.path_index_dict[monster] = 0
         self.master_path_dict[monster] = path
+        return path
+
+    def generate_random_path(self, monster, length=6):
+
+        keep_running = 1
+        pos = monster.pos
+        path = [pos]
+        while keep_running or len(path) < 2:
+            neighbors = self.grid.neighbors(pos)
+            r = random.randint(0, len(neighbors)-1)
+            new_pos = neighbors[r]
+            path.append(new_pos)
+            pos = new_pos
+            keep_running = random.randint(0, length-2)
+
+        self.path_index_dict[monster] = 0
+        self.master_path_dict[monster] = path
+        return path
 
     def get_next_step(self, monster):
         try:
-            if monster.pos == self.master_path_dict[monster[self.path_index_dict[monster]]]:
+            if monster.pos == self.master_path_dict[monster][self.path_index_dict[monster]]:
                 # Has it reached the end of the path
                 if monster.pos == self.master_path_dict[monster][-1]:
-                    self.path_index_dict[monster] = 0
+                    self.path_index_dict[monster] = 1
                     self.master_path_dict[monster].reverse()
                 else:
                     self.path_index_dict[monster] += 1
         except KeyError:
             print("Error in PathManager: {} not found".format(str(monster)))
             return False
-        return self.master_path_dict[monster[self.path_index_dict[monster]]]
+        return self.master_path_dict[monster][self.path_index_dict[monster]]
 
     def contains_sprite(self, sprite):
         if self.master_path_dict.get(sprite):

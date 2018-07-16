@@ -172,35 +172,20 @@ class Logic(BaseSystem):
 
     def monster_loop(self):
         if self.game_vars[GAME_STATE] == PATHING:
-            if self.active_sprite.target is not None:
+            self.path = self.active_sprite.AI.do_move(self.grid, self.PathManager)
 
-                self.path = self.active_sprite.AI.do_move(self.grid, self.PathManager)
+            make_event(PRINT_LINE, message=self.active_sprite.name + " moves to " + str(self.path[-1]))
 
-                self.vector_dic = {self.active_sprite.pos: (0, 0)}  # For paths of no distance
-                for i in range(len(self.path) - 1):  # Minus 1 ensures that we never get an IndexError
-                    # Calculates the direction each sprite has to travel from the spots on the path
-                    self.vector_dic[self.path[i]] = (self.path[i + 1][0] - self.path[i][0],
-                                                     self.path[i + 1][1] - self.path[i][1])
-                if len(self.path) == 1:
-                    self.game_vars[GAME_STATE] = ATTACKING  # Skips if players move to their own spot
-                else:
-                    self.game_vars[GAME_STATE] = MOVING
-                    self.Engine.Animator.set_animation(self.active_sprite, scripts.animations.run())
+            self.vector_dic = {self.active_sprite.pos: (0, 0)}  # For paths of no distance
+            for i in range(len(self.path) - 1):  # Minus 1 ensures that we never get an IndexError
+                # Calculates the direction each sprite has to travel from the spots on the path
+                self.vector_dic[self.path[i]] = (self.path[i + 1][0] - self.path[i][0],
+                                                 self.path[i + 1][1] - self.path[i][1])
+            if len(self.path) == 1:
+                self.game_vars[GAME_STATE] = ATTACKING  # Skips if players move to their own spot
             else:
-                goal = (self.active_sprite.pos[0] + 1, self.active_sprite.pos[1] + 1)
-                self.path = Astar.a_star(self.active_sprite.pos, goal, self.grid)
-                # Trimmed so that the sprite never moves father than it actually can
-                self.path = self.path[:self.active_sprite.speed + 1]
-
-                make_event(PRINT_LINE, message=self.active_sprite.name + " moves to " + str(self.path[-1]))
-
-                self.vector_dic = {self.active_sprite.pos: (0, 0)}  # For paths of no distance
-                for i in range(len(self.path) - 1):  # Minus 1 ensures that we never get an IndexError
-                    # Calculates the direction each sprite has to travel from the spots on the path
-                    self.vector_dic[self.path[i]] = (self.path[i + 1][0] - self.path[i][0],
-                                                     self.path[i + 1][1] - self.path[i][1])
-                self.Engine.Animator.set_animation(self.active_sprite, scripts.animations.run())
                 self.game_vars[GAME_STATE] = MOVING
+                self.Engine.Animator.set_animation(self.active_sprite, scripts.animations.run())
 
         if self.game_vars[GAME_STATE] == MOVING:
             if self.active_sprite.ticked():
