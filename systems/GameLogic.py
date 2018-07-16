@@ -1,13 +1,12 @@
 import sys
-
 from scripts.Colors import Color
 from scripts.variables.localvars import *
 from scripts.variables.events import *
 import scripts.animations
-
 from scripts import Astar as Astar
 from scripts import tools
 from systems.BaseSystem import BaseSystem
+from scripts import pathing
 
 
 class Logic(BaseSystem):
@@ -36,6 +35,8 @@ class Logic(BaseSystem):
         self.monster = None
 
         self.turn_counter = 1
+
+        self.PathManager = pathing.PathManager(self.grid)
 
     def set_engine(self, new_engine):
         self.Engine = new_engine
@@ -173,9 +174,7 @@ class Logic(BaseSystem):
         if self.game_vars[GAME_STATE] == PATHING:
             if self.active_sprite.target is not None:
 
-                self.path = self.active_sprite.get_move(self.grid)
-                # Trimmed so that the sprite never moves father than it actually can
-                self.path = self.path[:self.active_sprite.speed + 1]
+                self.path = self.active_sprite.AI.do_move(self.grid, self.PathManager)
 
                 self.vector_dic = {self.active_sprite.pos: (0, 0)}  # For paths of no distance
                 for i in range(len(self.path) - 1):  # Minus 1 ensures that we never get an IndexError

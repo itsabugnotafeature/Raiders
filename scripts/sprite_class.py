@@ -2,6 +2,8 @@ from scripts.ability import *
 from scripts import sprite_ai
 #import scripts.gui_elements.DisplayWindow
 
+# TODO: generate getter/setter methods for all traits so that abilities can edit/reset them
+
 
 class Sprite:
 
@@ -139,6 +141,3 @@ class Monster(Sprite):
 
     def set_target(self, target):
         self.target = target
-
-    def get_move(self, grid):
-        return self.AI.do_move(grid)
