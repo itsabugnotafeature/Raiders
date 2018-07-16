@@ -1,4 +1,5 @@
 from scripts.ability import *
+from scripts import sprite_ai
 #import scripts.gui_elements.DisplayWindow
 
 
@@ -122,6 +123,8 @@ class Monster(Sprite):
                           melee_attack("Light", self, (basic_damage("", 1),), ("light")),
                           melee_attack("Light", self, (basic_damage("", 1),), ("light"))]
 
+        self.AI = sprite_ai.BaseMonsterAI(self)
+
     def dodamage(self, source, value):
         super().dodamage(source, value)
         if source not in self.threattable:
@@ -136,3 +139,6 @@ class Monster(Sprite):
 
     def set_target(self, target):
         self.target = target
+
+    def get_move(self, grid):
+        return self.AI.do_move(grid)

@@ -24,7 +24,7 @@ class Logic(BaseSystem):
             blocked_spots.append((i, -1))
             blocked_spots.append((i, 8))
 
-        self.grid = Astar.grid(8, 8, blocked_spots)
+        self.grid = Astar.Grid(8, 8, blocked_spots)
         self.path = []
         self.path_index = 0
         self.vector_dic = {}
@@ -125,8 +125,11 @@ class Logic(BaseSystem):
 
                     if self.path[-1] == self.path[self.path_index + 1]:
                         self.Engine.Animator.set_animation(self.active_sprite, scripts.animations.standby())
+
+                        # Remove old player position from grid
                         self.grid.wpop(self.active_sprite.last_pos)
                         self.active_sprite.pos = (round(self.active_sprite.pos[0]), round(self.active_sprite.pos[1]))
+                        # Add new player position to grid
                         self.grid.wpush(self.active_sprite.pos)
                         self.active_sprite.last_pos = self.active_sprite.pos
                         self.game_vars[GAME_STATE] = ATTACKING
@@ -170,7 +173,7 @@ class Logic(BaseSystem):
         if self.game_vars[GAME_STATE] == PATHING:
             if self.active_sprite.target is not None:
 
-                self.path = Astar.a_star(self.active_sprite.pos, self.active_sprite.target.pos, self.grid)
+                self.path = self.active_sprite.get_move(self.grid)
                 # Trimmed so that the sprite never moves father than it actually can
                 self.path = self.path[:self.active_sprite.speed + 1]
 

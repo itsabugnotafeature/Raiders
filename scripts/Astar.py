@@ -2,7 +2,7 @@ import queue
 from math import sqrt
 
 
-class grid:
+class Grid:
 
     def __init__(self, cols, rows, walls):
         self.cols = cols
