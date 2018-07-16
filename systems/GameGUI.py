@@ -234,26 +234,27 @@ class GUI(BaseSystem):
                 make_event(SURFACE, surf=self.move_highlight, pos=offset, z=0)
 
     def display_pause_gui(self):
-        # The number added to self.Engine.window_width should equal the width of the button
-        width = (self.Engine.window_width - 400) / 2
-        height = 150
+        # The number subtracted to self.Engine.window_width should equal the width of the button
+        BUTTON_WIDTH = 400
+        x = (self.Engine.window_width - BUTTON_WIDTH) / 2
+        y = 150
         # TODO: make a subclass for pause buttons
-        self.gui_list.append(scripts.gui_elements.Button((width, height + 48, 400, 48), self.GUITheme,
+        self.gui_list.append(scripts.gui_elements.Button((x, y + 48, BUTTON_WIDTH, 48), self.GUITheme,
                                                          text="Unpause", action=make_event,
                                                          action_kwargs={"type": pygame.KEYDOWN, "key": pygame.K_ESCAPE}))
         self.pause_gui_addresses.append(len(self.gui_list) - 1)
-        self.gui_list.append(scripts.gui_elements.Button((width, height + 48 * 2 + 16, 400, 48), self.GUITheme,
+        self.gui_list.append(scripts.gui_elements.Button((x, y + 48 * 2 + 16, BUTTON_WIDTH, 48), self.GUITheme,
                                                          text="Quit", action=make_event,
                                                          action_kwargs={"type": pygame.QUIT}))
         self.pause_gui_addresses.append(len(self.gui_list) - 1)
-        self.gui_list.append(scripts.gui_elements.Button((width, height + 48 * 3 + 32, 400, 48), self.GUITheme,
+        self.gui_list.append(scripts.gui_elements.Button((x, y + 48 * 3 + 32, BUTTON_WIDTH, 48), self.GUITheme,
                                                          text="Toggle Fullscreen", action=make_event,
                                                          action_kwargs={"type": FLSCRN_TOGGLE}))
         self.pause_gui_addresses.append(len(self.gui_list) - 1)
-        self.gui_list.append(scripts.gui_elements.Button((width, height + 48 * 4 + 46, 400, 48), self.GUITheme,
+        self.gui_list.append(scripts.gui_elements.Button((x, y + 48 * 4 + 48, BUTTON_WIDTH, 48), self.GUITheme,
                                                          text="(Not Implemented)"))
         self.pause_gui_addresses.append(len(self.gui_list) - 1)
-        self.gui_list.append(scripts.gui_elements.Button((width, height + 48 * 5 + 62, 400, 48), self.GUITheme,
+        self.gui_list.append(scripts.gui_elements.Button((x, y + 48 * 5 + 64, BUTTON_WIDTH, 48), self.GUITheme,
                                                          text="(Not Implemented)"))
         self.pause_gui_addresses.append(len(self.gui_list) - 1)
 
