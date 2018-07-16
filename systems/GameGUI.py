@@ -142,10 +142,10 @@ class GUI(BaseSystem):
                            pos=(spot[0] * 80 + offset[0],
                                 spot[1] * 80 + offset[1]), z=0)
 
+            self.make_highlight_tile()
+
         for gui in self.gui_list:
             gui.update(self.Engine)
-
-        self.make_highlight_tile()
 
         if self.game_vars[GAME_STATE] == ATTACKING:
             self.make_attacking_tiles()
