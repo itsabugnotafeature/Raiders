@@ -136,6 +136,8 @@ class GUI(BaseSystem):
             self.make_pathing_highlight()
             self.make_highlight_tile()
 
+            self.make_highlight_tile()
+
         for gui in self.gui_list:
             gui.update(self.Engine)
 
