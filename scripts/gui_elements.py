@@ -373,7 +373,7 @@ class InputTextBox:
                         self.text = self.text[0:-2]
                     self.update_message_board()
 
-            # TODO: optimize the typing variable use
+            # TODO: optimize the typing variable use to only set once, do it in the event handler
             engine.game_vars[TYPING] = True
         else:
             engine.game_vars[TYPING] = False
@@ -432,7 +432,7 @@ class Button:
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONUP:
             if self.in_bounds(event.pos) and self.state != DISABLED:
-                print("button '" + str(hash(self)) + "' executed event")
+                print("button '" + str(hash(self)) + "' created event of type: " + str(self.action_kwargs["type"]))
                 self.use_action()
         elif event.type == pygame.MOUSEMOTION:
             if self.in_bounds(event.pos) and self.state != DISABLED:
