@@ -18,7 +18,7 @@ class PathManager:
             self.path_index_dict[monster] = 0
             self.master_path_dict[monster] = path
         else:
-            self.generate_random_path(monster)
+            self.generate_path(monster)
 
     def generate_path(self, monster, length=6, repetitions=0):
 
