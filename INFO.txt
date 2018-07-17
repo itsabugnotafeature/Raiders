@@ -13,3 +13,11 @@ TO DO:
   !:
 	Create a file save and load class
 	Sounds
+
+
+ROUNDS:             >           FIGHTS:             >           TURNS:
+A round is comprised of      >  A fight is comprised of three > During each turn, both players
+fights, once every sprite,   >  turns. Each turn is completed > must select an ability to use.
+including all monsters have  >  when both the fighting player > Once they are selected the instigating
+had one fight, the round     >  and the fighting monster have > player goes first followed by the defending
+is over                      >  have chosen an ability to use > player. Then any DoT, HoT, etc. are resolved

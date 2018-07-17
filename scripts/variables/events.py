@@ -22,7 +22,7 @@ FLSCRN_TOGGLE = 29      # Event dict:
 """Signals GameEngine to switch between fullscreen and windowed mode"""
 
 # FIGHT SUB EVENTS #
-FIGHT_BEGIN = 0     # Signals beginning of fight, creation of buttons // kwargs(fighting_player=player)
+FIGHT_BEGIN = 0     # Signals beginning of fight, creation of buttons // kwargs(player=Player, monster=Monster)
 FIGHT_END = 1       # Signals end of fight, destruction of buttons
 ACTION = 2          # Signals that an action was used, two per fight turn, logging of fight events // kwargs(num=int)
 RESET = 3           # Used for control, lets you rewind turns // kwargs(rewind_amount=int)

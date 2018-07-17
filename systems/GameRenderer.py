@@ -67,15 +67,7 @@ class Renderer(BaseSystem):
 
     def handle_event(self, event):
         if event.type == SURFACE:
-            # This finds the blit layer that the surface belongs to
-            eventz = min(event.z, len(self.surf_dict_list)-1)
-            # This adds the the surf and pos to the appropriate list in the dict,
-            # or if there is no list, it makes a new one.
-            # The surf is the key to a list of positions where it is to be blitted to
-            if not self.surf_dict_list[eventz].get(event.surf):
-                self.surf_dict_list[eventz][event.surf] = [event.pos]
-            else:
-                self.surf_dict_list[eventz][event.surf] += [event.pos]
+            self.add_surface(event.surf, event.pos, event.z)
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE and self.game_vars[PAUSE]:
@@ -225,3 +217,14 @@ class Renderer(BaseSystem):
 
     def count_blit(self):
         self.bpf += 1
+
+    def add_surface(self, surface, pos,  z_val):
+        # This finds the blit layer that the surface belongs to
+        eventz = min(z_val, len(self.surf_dict_list) - 1)
+        # This adds the the surf and pos to the appropriate list in the dict,
+        # or if there is no list, it makes a new one.
+        # The surf is the key to a list of positions where it is to be blitted to
+        if not self.surf_dict_list[eventz].get(surface):
+            self.surf_dict_list[eventz][surface] = [pos]
+        else:
+            self.surf_dict_list[eventz][surface] += [pos]
