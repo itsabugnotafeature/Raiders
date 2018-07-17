@@ -53,10 +53,6 @@ class BaseMonsterAI(BaseAI):
         path = path[:self.sprite.speed + 1]
         return path
 
-    def do_attack(self, defender, round_num):
-
-        self.sprite.use(round_num, defender)
-
     # Used to stop sprites from getting caught on walls
     def evaluate_goal(self, spot):
         if spot == self.last_goal:
@@ -64,3 +60,8 @@ class BaseMonsterAI(BaseAI):
         else:
             self.last_goal = spot
             return True
+
+    # Ability_pos should always be the round number
+    def do_attack(self, target, ability_pos):
+
+        self.sprite.use(round_num, defender)

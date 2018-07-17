@@ -1,5 +1,6 @@
 from scripts.ability import *
 from scripts import sprite_ai
+from scripts import sprite_threat
 #import scripts.gui_elements.DisplayWindow
 
 # TODO: generate getter/setter methods for all traits so that abilities can edit/reset them
@@ -18,9 +19,9 @@ class Sprite:
         self.weakness = 0
         self.effects = []
         self.fightable = True
-        self.abilities = [melee_attack("Light", self, (basic_damage("", 1),), ("light")),
-                          melee_attack("Light", self, (basic_damage("", 1),), ("light")),
-                          melee_attack("Light", self, (basic_damage("", 1),), ("light"))]
+        self.abilities = [melee_attack("Light", self, (basic_damage("", 1),), ("light",)),
+                          melee_attack("Light", self, (basic_damage("", 1),), ("light",)),
+                          melee_attack("Light", self, (basic_damage("", 1),), ("light",))]
 
         # DRAWING ITSELF
         img = pygame.image.load("graphics//Sprites//" + picloc)
@@ -97,15 +98,15 @@ class Player(Sprite):
         if pclass.lower() == "warrior":
             self.abilities = ["light", "light", "heavy", "sweep", "block", "parry", "counter"]
         if pclass.lower() == "tank":
-            self.abilities = [melee_attack("Execute", self, (basic_damage("", 5),), ("heavy"), uses=3),
-                              melee_attack("OP BS", self, (op_damage(""),), ("magic"),
+            self.abilities = [melee_attack("Execute", self, (basic_damage("", 5),), ("heavy",), uses=3),
+                              melee_attack("OP BS", self, (op_damage(""),), ("magic",),
                                            "{1} is killed by the architects!"),
-                              melee_attack("Light", self, (basic_damage("", 1),), ("light")),
-                              melee_attack("Execute", self, (basic_damage("", 5),), ("heavy"), uses=3),
-                              melee_attack("OP BS", self, (op_damage(""),), ("magic"),
+                              melee_attack("Light", self, (basic_damage("", 1),), ("light",)),
+                              melee_attack("Execute", self, (basic_damage("", 5),), ("heavy",), uses=3),
+                              melee_attack("OP BS", self, (op_damage(""),), ("magic",),
                                            "{1} is killed by the architects!"),
-                              melee_attack("Light", self, (basic_damage("", 1),), ("light")),
-                              melee_attack("Light", self, (basic_damage("", 1),), ("light"))
+                              melee_attack("Light", self, (basic_damage("", 1),), ("light",)),
+                              melee_attack("Light", self, (basic_damage("", 1),), ("light",))
                               ]
 
     def choose_ability(self, pos):
@@ -117,24 +118,28 @@ class Monster(Sprite):
     def __init__(self, name, class_, picloc, pos, abilities=[]):
         super().__init__(name, class_, picloc, pos)
         self.type = "monster"
-        self.threattable = {None: 0}
         self.target = None
         self.speed = 4
         self.health = 20
-        self.abilities = [melee_attack("Light", self, (basic_damage("", 1),), ("light")),
-                          melee_attack("Light", self, (basic_damage("", 1),), ("light")),
-                          melee_attack("Light", self, (basic_damage("", 1),), ("light"))]
+
+        # Both of these ability lists should be exactly 3 items long and contain only Ability classes
+        self.threat_abilities = [melee_attack("Execute", self, (basic_damage("", 5),), ("heavy",), uses=3),
+                                 melee_attack("Light", self, (basic_damage("", 1),), ("light",)),
+                                 melee_attack("Execute", self, (basic_damage("", 5),), ("heavy",), uses=3)]
+        self.no_threat_abilities = [melee_attack("Light", self, (basic_damage("", 1),), ("light",)),
+                                    melee_attack("Light", self, (basic_damage("", 1),), ("light",)),
+                                    melee_attack("Light", self, (basic_damage("", 1),), ("light",))]
 
         self.AI = sprite_ai.BaseMonsterAI(self)
+        self.ThreatManager = sprite_threat.ThreatManager(self)
 
     def dodamage(self, source, value):
         super().dodamage(source, value)
-        if source not in self.threattable:
-            self.threattable[source] = value
-        else:
-            self.threattable[source] = self.threattable[source] + value
-        if self.threattable[source] > self.threattable[self.target]:
-            self.target = source
+        self.target = self.ThreatManager.do_threat_update(source, value)
+
+    # Ability_pos should always be the round number when using this method on an instance of Monster
+    def use(self, ability_pos, target, ability=None):
+        self.AI.do_attack(target, ability_pos)
 
     def get_target(self):
         return self.target
