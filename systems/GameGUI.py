@@ -268,7 +268,7 @@ class GUI(BaseSystem):
 
     def dehover_guis(self):
         for gui in self.gui_list:
-            if isinstance(gui, scripts.gui_elements.Button):
+            if isinstance(gui, scripts.gui_elements.Button) and gui.state != DISABLED:
                 gui.state = BASE_STATE
                 gui.update_blit_image()
             if isinstance(gui, scripts.gui_elements.ScrollingTextBox):

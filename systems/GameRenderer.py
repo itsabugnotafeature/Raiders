@@ -132,14 +132,7 @@ class Renderer(BaseSystem):
         self.surf_dict2.clear()
         self.surf_dict3.clear()
 
-        if not self.paused:
-            pygame.display.flip()
-        else:
-            width = (self.Engine.window_width - 400) / 2
-            pygame.display.update((width, 0, 400, self.Engine.window_height))
-            mousex, mousey = pygame.mouse.get_pos()
-            pygame.display.update((mousex-100, mousey-100, 200, 200))
-            pygame.display.update((0, 0, 300, 200))
+        self.update_screen()
 
     def do_pause_screencap(self):
         self.Engine.display_window.fill(Color.Wheat)
@@ -185,3 +178,13 @@ class Renderer(BaseSystem):
         self.Engine.display_window.blit(
             self.Engine.font.render("ARM: " + str(self.Engine.game_vars[ADJUSTED_RMOUSE_POS]),
                                     0, Color.Red), (0, 150))
+
+    def update_screen(self):
+        if not self.paused:
+            pygame.display.flip()
+        else:
+            width = (self.Engine.window_width - 400) / 2
+            pygame.display.update((width, 0, 400, self.Engine.window_height))
+            mousex, mousey = pygame.mouse.get_pos()
+            pygame.display.update((mousex-150, mousey-150, 300, 300))
+            pygame.display.update((0, 0, 300, 200))
