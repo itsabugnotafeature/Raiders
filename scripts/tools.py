@@ -4,7 +4,8 @@ Provides some helpful math functions for the game systems
 from scripts.variables.localvars import *
 import pygame
 from scripts.Colors import Color
-
+import random
+import math
 
 def tup_round(tuple, digits=0):
     return round(tuple[0], digits), round(tuple[1], digits)
@@ -103,3 +104,61 @@ def get_percentage_color(percentage):
                     Color1[1] + Color2[1],
                     Color1[2] + Color2[2])
     return output_color
+
+
+# Makes a list of numbers,which go from 0 to end or alternatively from start to end, in random order
+def random_list(end, start=0, length=None):
+    base_list = []
+    for i in range(start, end):
+        base_list.append(i)
+    final_list = []
+    if length is None:
+        for i in range(len(base_list)):
+            num = base_list[random.randint(0, len(base_list)-1)]
+            final_list.append(num)
+            base_list.remove(num)
+    else:
+        for i in range(length):
+            num = base_list[random.randint(0, len(base_list) - 1)]
+            final_list.append(num)
+    return final_list
+
+
+def gen_idle_text():
+    # These will be .format(active_sprite.name) -ed
+    text_list = [
+        "{} wanders aimlessly.",
+        "{} roars in the distance, how scary!",
+        "{} rages with primal anger!",
+        "{} stares mournfully off into the distance.",
+        "{} is lonely.",
+        "{} wants someone to test his might against.",
+        "{} glares at you angrily!",
+        "{} beats his chest in a furious taunt!",
+        "{} licks his lips, hungry for blood!",
+        "{} beckons you coyly, surely he doesn't want to hurt you, right?"
+    ]
+    r = random.randint(0, len(text_list)-1)
+    return text_list[r]
+
+
+def get_square_size(hypotenuse):
+    side_length = hypotenuse / math.sqrt(2)
+    side_length = int(side_length)
+    print(side_length)
+    return side_length, side_length
+
+
+def outline_square(surface, color, width, offset=(0, 0)):
+    side_length = surface.get_width()
+
+    # Prevents part of the rect from cut off
+    side_length -= width
+    pygame.draw.rect(surface, color, (width/2+offset[0], width/2+offset[1], side_length, side_length), width)
+
+
+def center_offset(inner_dims, outer_dims):
+
+    return (outer_dims[0] - inner_dims[0]) / 2, (outer_dims[1] - inner_dims[1]) / 2
+
+

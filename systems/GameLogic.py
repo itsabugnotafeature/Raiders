@@ -1,13 +1,13 @@
 import sys
-
 from scripts.Colors import Color
 from scripts.variables.localvars import *
 from scripts.variables.events import *
 import scripts.animations
-
 from scripts import Astar as Astar
 from scripts import tools
 from systems.BaseSystem import BaseSystem
+from scripts import pathing
+from scripts import fighting
 
 
 class Logic(BaseSystem):
@@ -24,7 +24,7 @@ class Logic(BaseSystem):
             blocked_spots.append((i, -1))
             blocked_spots.append((i, 8))
 
-        self.grid = Astar.grid(8, 8, blocked_spots)
+        self.grid = Astar.Grid(8, 8, blocked_spots)
         self.path = []
         self.path_index = 0
         self.vector_dic = {}
@@ -32,10 +32,16 @@ class Logic(BaseSystem):
         self.active_sprite = None
         self.active_target = None
 
+        # These are set to the player and monster of any engagement after the active_sprite has finished his ATTACKING
+        # state. They are reset to None at the end of the fight and are completely independent of active_sprite and
+        # active_target
         self.player = None
         self.monster = None
 
         self.turn_counter = 1
+
+        self.PathManager = pathing.PathManager(self.grid)
+        self.FightManager = fighting.FightManager(self)
 
     def set_engine(self, new_engine):
         self.Engine = new_engine
@@ -48,6 +54,7 @@ class Logic(BaseSystem):
 
     def init(self, engine):
         self.set_engine(engine)
+        self.FightManager.set_engine(engine)
         self.set_up()
 
     def player_loop(self):
@@ -125,8 +132,11 @@ class Logic(BaseSystem):
 
                     if self.path[-1] == self.path[self.path_index + 1]:
                         self.Engine.Animator.set_animation(self.active_sprite, scripts.animations.standby())
+
+                        # Remove old player position from grid
                         self.grid.wpop(self.active_sprite.last_pos)
                         self.active_sprite.pos = (round(self.active_sprite.pos[0]), round(self.active_sprite.pos[1]))
+                        # Add new player position to grid
                         self.grid.wpush(self.active_sprite.pos)
                         self.active_sprite.last_pos = self.active_sprite.pos
                         self.game_vars[GAME_STATE] = ATTACKING
@@ -147,10 +157,12 @@ class Logic(BaseSystem):
                             # TODO: check if the target is in range for any of the players abilities, if so which ones?
                             if sprite.type == "monster" or self.game_vars[FRIENDLY_FIRE]:
                                 make_event(PRINT_LINE, message=self.active_sprite.name + " attacks " + sprite.name)
-                                make_event(FIGHT_EVENT, subtype=FIGHT_BEGIN, player=self.active_sprite)
+                                make_event(FIGHT_EVENT, subtype=FIGHT_BEGIN, player=self.active_sprite, monster=sprite)
                                 self.active_target = sprite
                                 self.player = self.active_sprite
                                 self.monster = self.active_target
+
+                                self.game_vars[GAME_STATE] = IN_FIGHT
                                 break
                         elif self.game_vars[FRIENDLY_FIRE]:
                             make_event(PRINT_LINE, message=self.active_sprite.name + " attacks themselves!")
@@ -158,47 +170,35 @@ class Logic(BaseSystem):
                             self.active_target = sprite
                             self.player = self.active_sprite
                             self.monster = self.active_target
+
+                            self.game_vars[GAME_STATE] = IN_FIGHT
                             break
                 self.active_sprite.facing = tools.get_facing_vector(self.active_sprite.pos,
-                                                                    self.game_vars[ADJUSTED_RMOUSE_POS],
+                                                                    self.active_target.pos,
                                                                     self.active_sprite.facing)
+                self.active_target.facing = tools.get_facing_vector(self.active_target.pos,
+                                                                    self.active_sprite.pos,
+                                                                    self.active_target.facing)
 
         if self.game_vars[GAME_STATE] == IN_FIGHT:
             pass
 
     def monster_loop(self):
         if self.game_vars[GAME_STATE] == PATHING:
-            if self.active_sprite.target is not None:
+            self.path = self.active_sprite.AI.do_move(self.grid, self.PathManager)
 
-                self.path = Astar.a_star(self.active_sprite.pos, self.active_sprite.target.pos, self.grid)
-                # Trimmed so that the sprite never moves father than it actually can
-                self.path = self.path[:self.active_sprite.speed + 1]
+            make_event(PRINT_LINE, message=self.active_sprite.name + " moves to " + str(self.path[-1]))
 
-                self.vector_dic = {self.active_sprite.pos: (0, 0)}  # For paths of no distance
-                for i in range(len(self.path) - 1):  # Minus 1 ensures that we never get an IndexError
-                    # Calculates the direction each sprite has to travel from the spots on the path
-                    self.vector_dic[self.path[i]] = (self.path[i + 1][0] - self.path[i][0],
-                                                     self.path[i + 1][1] - self.path[i][1])
-                if len(self.path) == 1:
-                    self.game_vars[GAME_STATE] = ATTACKING  # Skips if players move to their own spot
-                else:
-                    self.game_vars[GAME_STATE] = MOVING
-                    self.Engine.Animator.set_animation(self.active_sprite, scripts.animations.run())
+            self.vector_dic = {self.active_sprite.pos: (0, 0)}  # For paths of no distance
+            for i in range(len(self.path) - 1):  # Minus 1 ensures that we never get an IndexError
+                # Calculates the direction each sprite has to travel from the spots on the path
+                self.vector_dic[self.path[i]] = (self.path[i + 1][0] - self.path[i][0],
+                                                 self.path[i + 1][1] - self.path[i][1])
+            if len(self.path) == 1:
+                self.game_vars[GAME_STATE] = ATTACKING  # Skips if players move to their own spot
             else:
-                goal = (self.active_sprite.pos[0] + 1, self.active_sprite.pos[1] + 1)
-                self.path = Astar.a_star(self.active_sprite.pos, goal, self.grid)
-                # Trimmed so that the sprite never moves father than it actually can
-                self.path = self.path[:self.active_sprite.speed + 1]
-
-                make_event(PRINT_LINE, message=self.active_sprite.name + " moves to " + str(self.path[-1]))
-
-                self.vector_dic = {self.active_sprite.pos: (0, 0)}  # For paths of no distance
-                for i in range(len(self.path) - 1):  # Minus 1 ensures that we never get an IndexError
-                    # Calculates the direction each sprite has to travel from the spots on the path
-                    self.vector_dic[self.path[i]] = (self.path[i + 1][0] - self.path[i][0],
-                                                     self.path[i + 1][1] - self.path[i][1])
-                self.Engine.Animator.set_animation(self.active_sprite, scripts.animations.run())
                 self.game_vars[GAME_STATE] = MOVING
+                self.Engine.Animator.set_animation(self.active_sprite, scripts.animations.run())
 
         if self.game_vars[GAME_STATE] == MOVING:
             if self.active_sprite.ticked():
@@ -245,23 +245,25 @@ class Logic(BaseSystem):
                         self.path_index += 1
 
         if self.game_vars[GAME_STATE] == ATTACKING:
-            self.game_vars[GAME_STATE] = IN_FIGHT
+            if self.active_sprite.get_target() is not None:
+                self.active_target = self.active_sprite.get_target()
+                self.player = self.active_target
+                self.monster = self.active_sprite
+
+                make_event(PRINT_LINE, message=self.active_sprite.name + " attacks " + self.active_target.name)
+                make_event(FIGHT_EVENT, subtype=FIGHT_BEGIN, player=self.active_target, monster=self.active_sprite)
+
+                self.game_vars[GAME_STATE] = IN_FIGHT
+            else:
+                make_event(PRINT_LINE, message=scripts.tools.gen_idle_text().format(self.active_sprite.name))
+                self.game_vars[GAME_STATE] = TURN_RESET
 
         if self.game_vars[GAME_STATE] == IN_FIGHT:
-            self.game_vars[GAME_STATE] = TURN_RESET
+            pass
 
     def handle_event(self, event):
         if event.type == FIGHT_EVENT:
-            if event.subtype == ACTION:
-                self.player.use(event.num, self.monster)
-                self.Engine.Animator.set_animation(self.player, scripts.animations.attack())
-                self.turn_counter += 1
-                if self.turn_counter > 3:
-                    self.game_vars[GAME_STATE] = TURN_RESET
-                    make_event(FIGHT_EVENT, subtype=FIGHT_END)
-                    self.turn_counter = 1
-                    self.monster = None
-                    self.player = None
+            self.FightManager.handle_event(event)
 
     def main_loop(self):
 
@@ -299,3 +301,9 @@ class Logic(BaseSystem):
             elif self.active_sprite.type == "monster":
                 self.monster_loop()
                 # TODO Finish game logic
+
+    def get_active_sprite(self):
+        return self.active_sprite
+
+    def get_active_target(self):
+        return self.active_target

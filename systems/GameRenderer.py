@@ -37,6 +37,9 @@ class Renderer(BaseSystem):
         self.paused = False
         self.pause_flagged = False
 
+        # Used for tracking blits per frame for debugging purposes
+        self.bpf = 0
+
     def set_up(self):
         self.terrain.convert()
         self.cursor_img.convert()
@@ -51,6 +54,7 @@ class Renderer(BaseSystem):
         self.background_img.fill(Color.Wheat)
         self.background_img.blit(self.terrain, self.game_vars[BOARD_OFFSET])
 
+
     def set_engine(self, new_engine):
         self.Engine = new_engine
         self.game_vars = new_engine.game_vars
@@ -63,15 +67,7 @@ class Renderer(BaseSystem):
 
     def handle_event(self, event):
         if event.type == SURFACE:
-            # This finds the blit layer that the surface belongs to
-            eventz = min(event.z, len(self.surf_dict_list)-1)
-            # This adds the the surf and pos to the appropriate list in the dict,
-            # or if there is no list, it makes a new one.
-            # The surf is the key to a list of positions where it is to be blitted to
-            if not self.surf_dict_list[eventz].get(event.surf):
-                self.surf_dict_list[eventz][event.surf] = [event.pos]
-            else:
-                self.surf_dict_list[eventz][event.surf] += [event.pos]
+            self.add_surface(event.surf, event.pos, event.z)
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE and self.game_vars[PAUSE]:
@@ -86,6 +82,9 @@ class Renderer(BaseSystem):
 
     def main_loop(self):
 
+        # Rest bpf value
+        self.bpf = 0
+
         if self.pause_flagged:
             self.do_pause_screencap()
             self.pause_flagged = False
@@ -98,29 +97,39 @@ class Renderer(BaseSystem):
             offset = (self.game_vars[BOARD_OFFSET][0]+self.game_vars[GRID_OFFSET][0],
                       self.game_vars[BOARD_OFFSET][1]+self.game_vars[GRID_OFFSET][1])
             self.Engine.display_window.blit(self.terrain, offset)
+            self.count_blit()
 
             for surf in self.surf_dict0:
                 for spot in self.surf_dict0[surf]:
                     self.Engine.display_window.blit(surf, spot)
+                    self.count_blit()
 
             for sprite in self.game_vars[SPRITE_LIST]:
                 self.Engine.display_window.blit(sprite.draw(),
                                                 (sprite.pos[0] * 80 + offset[0] + sprite.offset[0],
                                                 sprite.pos[1] * 80 + offset[1] + sprite.offset[1]))
+                self.count_blit()
 
             for surf in self.surf_dict1:
                 for spot in self.surf_dict1[surf]:
                     self.Engine.display_window.blit(surf, spot)
+                    self.count_blit()
 
             for surf in self.surf_dict2:
                 for spot in self.surf_dict2[surf]:
                     self.Engine.display_window.blit(surf, spot)
+                    self.count_blit()
         else:
             self.Engine.display_window.blit(self.pause_frame, (0, 0))
+            self.count_blit()
 
             for surf in self.surf_dict3:
                 for spot in self.surf_dict3[surf]:
                     self.Engine.display_window.blit(surf, spot)
+                    self.count_blit()
+
+        # To account for the mouse blit, which comes after and therfore can't be logged normally
+        self.count_blit()
 
         if self.game_vars[DEBUG]:
             self.display_debug_info()
@@ -132,14 +141,7 @@ class Renderer(BaseSystem):
         self.surf_dict2.clear()
         self.surf_dict3.clear()
 
-        if not self.paused:
-            pygame.display.flip()
-        else:
-            width = (self.Engine.window_width - 400) / 2
-            pygame.display.update((width, 0, 400, self.Engine.window_height))
-            mousex, mousey = pygame.mouse.get_pos()
-            pygame.display.update((mousex-100, mousey-100, 200, 200))
-            pygame.display.update((0, 0, 300, 200))
+        self.update_screen()
 
     def do_pause_screencap(self):
         self.Engine.display_window.fill(Color.Wheat)
@@ -148,10 +150,12 @@ class Renderer(BaseSystem):
                   self.game_vars[BOARD_OFFSET][1] + self.game_vars[GRID_OFFSET][1])
 
         self.Engine.display_window.blit(self.terrain, offset)
+        self.count_blit()
 
         for surf in self.surf_dict0:
             for spot in self.surf_dict0[surf]:
                 self.Engine.display_window.blit(surf, spot)
+                self.count_blit()
 
         for sprite in self.game_vars[SPRITE_LIST]:
             self.Engine.display_window.blit(sprite.draw(),
@@ -159,29 +163,68 @@ class Renderer(BaseSystem):
                                              sprite.offset[0],
                                              sprite.pos[1] * 80 + offset[1] +
                                              sprite.offset[1]))
+            self.count_blit()
 
         for surf in self.surf_dict1:
             for spot in self.surf_dict1[surf]:
                 self.Engine.display_window.blit(surf, spot)
+                self.count_blit()
 
         for surf in self.surf_dict2:
             for spot in self.surf_dict2[surf]:
                 self.Engine.display_window.blit(surf, spot)
+                self.count_blit()
 
         self.pause_frame = self.Engine.display_window.copy()
         self.paused = True
         self.pause_frame.blit(self.pause_layer, (0, 0))
+        self.count_blit()
         self.Engine.display_window.blit(self.pause_frame, (0, 0))
+        self.count_blit()
         pygame.display.flip()
 
     def display_debug_info(self):
         self.Engine.display_window.blit(self.Engine.font.render("FPS: " + str(round(self.game_vars[FPS], 1)),
                                                                 0, Color.Red), (0, 0))
+        self.count_blit()
         self.Engine.display_window.blit(self.Engine.font.render("Dimensions: " + str((self.Engine.window_width,
                                                                                       self.Engine.window_height)),
                                                                 0, Color.Red), (0, 50))
+        self.count_blit()
         self.Engine.display_window.blit(self.Engine.font.render("RMOUSE: " + str(self.Engine.game_vars[RMOUSE_POS]),
                                                                 0, Color.Red), (0, 100))
+        self.count_blit()
         self.Engine.display_window.blit(
             self.Engine.font.render("ARM: " + str(self.Engine.game_vars[ADJUSTED_RMOUSE_POS]),
                                     0, Color.Red), (0, 150))
+        self.count_blit()
+
+        # To account for blitting the debug info
+        self.count_blit()
+        self.Engine.display_window.blit(
+            self.Engine.font.render("BPF: " + str(self.bpf), 0, Color.Red), (0, 200))
+
+    def update_screen(self):
+        if not self.paused:
+            pygame.display.flip()
+        else:
+            width = (self.Engine.window_width - 400) / 2
+            pygame.display.update((width, 0, 400, self.Engine.window_height))
+            mousex, mousey = pygame.mouse.get_pos()
+            pygame.display.update((mousex-150, mousey-150, 300, 300))
+            if self.game_vars[DEBUG]:
+                pygame.display.update((0, 0, 300, 250))
+
+    def count_blit(self):
+        self.bpf += 1
+
+    def add_surface(self, surface, pos,  z_val):
+        # This finds the blit layer that the surface belongs to
+        eventz = min(z_val, len(self.surf_dict_list) - 1)
+        # This adds the the surf and pos to the appropriate list in the dict,
+        # or if there is no list, it makes a new one.
+        # The surf is the key to a list of positions where it is to be blitted to
+        if not self.surf_dict_list[eventz].get(surface):
+            self.surf_dict_list[eventz][surface] = [pos]
+        else:
+            self.surf_dict_list[eventz][surface] += [pos]
