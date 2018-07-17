@@ -1,5 +1,8 @@
 from scripts.ability import *
+from scripts import sprite_ai
 #import scripts.gui_elements.DisplayWindow
+
+# TODO: generate getter/setter methods for all traits so that abilities can edit/reset them
 
 
 class Sprite:
@@ -121,6 +124,8 @@ class Monster(Sprite):
         self.abilities = [melee_attack("Light", self, (basic_damage("", 1),), ("light")),
                           melee_attack("Light", self, (basic_damage("", 1),), ("light")),
                           melee_attack("Light", self, (basic_damage("", 1),), ("light"))]
+
+        self.AI = sprite_ai.BaseMonsterAI(self)
 
     def dodamage(self, source, value):
         super().dodamage(source, value)
