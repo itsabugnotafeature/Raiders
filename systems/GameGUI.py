@@ -3,6 +3,7 @@ import scripts.tools
 from scripts.Colors import Color
 from scripts.variables.localvars import *
 from systems.BaseSystem import BaseSystem
+from scripts import highlights
 
 
 class GUI(BaseSystem):
@@ -38,6 +39,12 @@ class GUI(BaseSystem):
         self.choosing_highlight.fill(Color.with_alpha(100, Color.Gray))
         pygame.draw.rect(self.choosing_highlight, Color.with_alpha(200, Color.DimGray), (0, 0, 66, 66), 2)
 
+        self.active_highlight = pygame.Surface(scripts.tools.get_square_size(70))
+        self.active_highlight.fill(Color.LightGreen)
+        scripts.tools.outline_square(self.active_highlight, Color.YellowGreen, 4)
+        self.active_highlight.set_colorkey(Color.Black)
+        self.active_highlight = pygame.transform.rotate(self.active_highlight, -45)
+
         self.fight_highlight = pygame.Surface((68, 68), pygame.SRCALPHA)
         self.fight_highlight.fill(Color.with_alpha(100, Color.IndianRed))
         pygame.draw.rect(self.fight_highlight, Color.with_alpha(200, Color.IndianRed), (0, 0, 66, 66), 2)
@@ -51,6 +58,9 @@ class GUI(BaseSystem):
         self.move_highlight.convert()
         self.fight_highlight.convert()
         self.friendly_highlight.convert()
+        self.active_highlight.convert()
+
+        self.active_highlight = highlights.BlinkingTile(self.active_highlight, (100, 200, 70))
 
         self.gui_list.append(scripts.gui_elements.ScrollingTextBox((4, self.Engine.window_height - 234, 400, 196),
                                                                    self.GUITheme))
@@ -133,16 +143,19 @@ class GUI(BaseSystem):
 
     def main_loop(self):
         if self.game_vars[GAME_STATE] == PATHING:
-            self.make_pathing_highlight()
-            self.make_highlight_tile()
-
-            self.make_highlight_tile()
+            if self.Engine.Logic.active_sprite.type =="player":
+                self.make_pathing_highlight()
+                self.make_highlight_tile()
+                self.make_active_tile(self.Engine)
 
         for gui in self.gui_list:
             gui.update(self.Engine)
 
         if self.game_vars[GAME_STATE] == ATTACKING:
-            self.make_attacking_tiles()
+            if self.Engine.Logic.active_sprite.type == "player":
+                self.make_attacking_tiles()
+                self.make_active_tile(self.Engine)
+
         counter = 0
         for sprite in self.game_vars[SPRITE_LIST]:
 
@@ -279,3 +292,15 @@ class GUI(BaseSystem):
                 gui.hover = False
                 gui.update_message_board()
 
+    def make_active_tile(self, engine):
+        self.active_highlight.update(engine)
+        active_sprite = self.Engine.Logic.active_sprite
+        active_pos = active_sprite.pos
+        center_offset = scripts.tools.center_offset((self.active_highlight.get_width(),
+                                                     self.active_highlight.get_width()),
+                                                    (80, 80))
+        offset = (active_pos[0] * 80 + self.game_vars[BOARD_OFFSET][0]
+                  + self.game_vars[GRID_OFFSET][0] + center_offset[0],
+                  active_pos[1] * 80 + self.game_vars[BOARD_OFFSET][1]
+                  + self.game_vars[GRID_OFFSET][1] + center_offset[1])
+        make_event(SURFACE, surf=self.active_highlight.render(), pos=offset, z=0)
