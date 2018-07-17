@@ -20,15 +20,30 @@ class PathManager:
         else:
             self.generate_random_path(monster)
 
-    def generate_path(self, monster, length=6, no_repeat=False):
+    def generate_path(self, monster, length=6, repetitions=0):
 
         pos = monster.pos
-        path = [pos]
-        # TODO: find a way to make a path with no repetition
+        final_path = [pos]
+        num_repetitions = 0
+        for i in range(length-1):
+            neighbors = self.grid.neighbors(pos)
+            for j in range(len(neighbors)):
+                r = random.randint(0, len(neighbors)-1)
+                if neighbors[r] in final_path:
+                    if num_repetitions < repetitions or len(neighbors) == 1:
+                        num_repetitions += 1
+                        final_path.append(neighbors[r])
+                        break
+                    else:
+                        neighbors.remove(neighbors[r])
+                else:
+                    final_path.append(neighbors[r])
+                    break
+            pos = final_path[-1]
 
         self.path_index_dict[monster] = 0
-        self.master_path_dict[monster] = path
-        return path
+        self.master_path_dict[monster] = final_path
+        return final_path
 
     def generate_random_path(self, monster, length=6):
 
