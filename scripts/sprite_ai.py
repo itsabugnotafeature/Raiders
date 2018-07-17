@@ -1,6 +1,7 @@
 from scripts.Astar import a_star
 from scripts import sprite_class
 import random
+from scripts import animations
 
 
 class BaseAI:
@@ -12,7 +13,7 @@ class BaseAI:
     def do_move(self, grid, path_manager):
         pass
 
-    def do_attack(self, defender, round_num):
+    def do_attack(self, target, ability_pos, engine):
         pass
 
 
@@ -62,6 +63,23 @@ class BaseMonsterAI(BaseAI):
             return True
 
     # Ability_pos should always be the round number
-    def do_attack(self, target, ability_pos):
+    def do_attack(self, target, ability_pos, engine):
+        # TODO: consider making a SpriteAnimator class that the AI can delegate animation tasks to
+        # Round numbers start at 1 and go to 3 so we subtract to avoid IndexError
+        ability_pos -= 1
+        try:
+            if target == self.sprite.get_target():
+                self.sprite.threat_abilities[ability_pos].afflict(target)
+                try:
+                    engine.Animator.set_animation(self.sprite, self.abilities[ability_pos].animation)
+                except AttributeError:
+                    print("Failed to find animation for {}'s ability number {}.".format(self.sprite.name, ability_pos))
+                    print("Reverting to default animation,")
+                    engine.Animator.set_animation(self.sprite, animations.attack())
+            else:
+                self.sprite.no_threat_abilities[ability_pos].afflict(target)
+        except IndexError:
 
-        self.sprite.use(round_num, defender)
+            # TODO: let it use abilities with multiple uses
+            print("Error using {}'s number {} ability, reverting to number 1.".format(self.sprite.name, ability_pos))
+            self.sprite.no_threat_abilities[0].afflict(target)

@@ -7,6 +7,7 @@ from scripts import Astar as Astar
 from scripts import tools
 from systems.BaseSystem import BaseSystem
 from scripts import pathing
+from scripts import fighting
 
 
 class Logic(BaseSystem):
@@ -31,12 +32,16 @@ class Logic(BaseSystem):
         self.active_sprite = None
         self.active_target = None
 
+        # These are set to the player and monster of any engagement after the active_sprite has finished his ATTACKING
+        # state. They are reset to None at the end of the fight and are completely independent of active_sprite and
+        # active_target
         self.player = None
         self.monster = None
 
         self.turn_counter = 1
 
         self.PathManager = pathing.PathManager(self.grid)
+        self.FightManager = fighting.FightManager(self)
 
     def set_engine(self, new_engine):
         self.Engine = new_engine
@@ -49,6 +54,7 @@ class Logic(BaseSystem):
 
     def init(self, engine):
         self.set_engine(engine)
+        self.FightManager.set_engine(engine)
         self.set_up()
 
     def player_loop(self):
@@ -151,10 +157,12 @@ class Logic(BaseSystem):
                             # TODO: check if the target is in range for any of the players abilities, if so which ones?
                             if sprite.type == "monster" or self.game_vars[FRIENDLY_FIRE]:
                                 make_event(PRINT_LINE, message=self.active_sprite.name + " attacks " + sprite.name)
-                                make_event(FIGHT_EVENT, subtype=FIGHT_BEGIN, player=self.active_sprite)
+                                make_event(FIGHT_EVENT, subtype=FIGHT_BEGIN, player=self.active_sprite, monster=sprite)
                                 self.active_target = sprite
                                 self.player = self.active_sprite
                                 self.monster = self.active_target
+
+                                self.game_vars[GAME_STATE] = IN_FIGHT
                                 break
                         elif self.game_vars[FRIENDLY_FIRE]:
                             make_event(PRINT_LINE, message=self.active_sprite.name + " attacks themselves!")
@@ -162,10 +170,15 @@ class Logic(BaseSystem):
                             self.active_target = sprite
                             self.player = self.active_sprite
                             self.monster = self.active_target
+
+                            self.game_vars[GAME_STATE] = IN_FIGHT
                             break
                 self.active_sprite.facing = tools.get_facing_vector(self.active_sprite.pos,
-                                                                    self.game_vars[ADJUSTED_RMOUSE_POS],
+                                                                    self.active_target.pos,
                                                                     self.active_sprite.facing)
+                self.active_target.facing = tools.get_facing_vector(self.active_target.pos,
+                                                                    self.active_sprite.pos,
+                                                                    self.active_target.facing)
 
         if self.game_vars[GAME_STATE] == IN_FIGHT:
             pass
@@ -232,23 +245,25 @@ class Logic(BaseSystem):
                         self.path_index += 1
 
         if self.game_vars[GAME_STATE] == ATTACKING:
-            self.game_vars[GAME_STATE] = IN_FIGHT
+            if self.active_sprite.get_target() is not None:
+                self.active_target = self.active_sprite.get_target()
+                self.player = self.active_target
+                self.monster = self.active_sprite
+
+                make_event(PRINT_LINE, message=self.active_sprite.name + " attacks " + self.active_target.name)
+                make_event(FIGHT_EVENT, subtype=FIGHT_BEGIN, player=self.active_target, monster=self.active_sprite)
+
+                self.game_vars[GAME_STATE] = IN_FIGHT
+            else:
+                make_event(PRINT_LINE, message=scripts.tools.gen_idle_text().format(self.active_sprite.name))
+                self.game_vars[GAME_STATE] = TURN_RESET
 
         if self.game_vars[GAME_STATE] == IN_FIGHT:
-            self.game_vars[GAME_STATE] = TURN_RESET
+            pass
 
     def handle_event(self, event):
         if event.type == FIGHT_EVENT:
-            if event.subtype == ACTION:
-                self.player.use(event.num, self.monster)
-                self.Engine.Animator.set_animation(self.player, scripts.animations.attack())
-                self.turn_counter += 1
-                if self.turn_counter > 3:
-                    self.game_vars[GAME_STATE] = TURN_RESET
-                    make_event(FIGHT_EVENT, subtype=FIGHT_END)
-                    self.turn_counter = 1
-                    self.monster = None
-                    self.player = None
+            self.FightManager.handle_event(event)
 
     def main_loop(self):
 
@@ -286,3 +301,9 @@ class Logic(BaseSystem):
             elif self.active_sprite.type == "monster":
                 self.monster_loop()
                 # TODO Finish game logic
+
+    def get_active_sprite(self):
+        return self.active_sprite
+
+    def get_active_target(self):
+        return self.active_target

@@ -27,7 +27,7 @@ class GameEngine:
         self.game_vars = {SPRITE_LIST: [
             scripts.sprite_class.Player("Thrall", "tank", "tank.png", (0, 0)),
             scripts.sprite_class.Player("Garrosh", "tank", "warrior.png", (1, 0)),
-            scripts.sprite_class.Monster("Infernus", "tank", "warrior.png", (1, 1))
+            scripts.sprite_class.Monster("Infernus", "tank", "tank.png", (1, 1))
         ], PAUSE: False, QUIT_SEQUENCE: False, GAME_STATE: TURN_RESET, SCROLL_DOWN: False, SCROLL_UP: False,
             MOUSE_CLICKED: False, SKIP_SEQUENCE: False, FRIENDLY_FIRE: False, TYPING: False, DEBUG: True,
             GRID_OFFSET: (0, -30), FULL_SCREEN: True
@@ -141,7 +141,7 @@ class GameEngine:
                     self.GUI.handle_event(event)
                 if event.subtype == ACTION:
                     self.GameSound.handle_event(event)
-                    self.Logic.handle_event(event)
+                self.Logic.handle_event(event)
 
             if event.type == PRINT_LINE:
                 # Is it a command?
