@@ -51,8 +51,8 @@ Directions for the sprite facing variable
 # 0: South(Down), 1: East(Right), 2: North(Up), 3: West(Left)
 SOUTH = 0
 EAST = 1
-NORTH = 2
-WEST = 3
+WEST = 2
+NORTH = 3
 
 """
 States for gui elements

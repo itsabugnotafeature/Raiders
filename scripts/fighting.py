@@ -37,6 +37,10 @@ class FightManager:
                 self.monster.use(self.turn_counter, self.player, self.Engine)
                 self.player.use(event.num, self.monster, self.Engine)
 
+            if not self.player.fightable or not self.monster.fightable:
+                make_event(FIGHT_EVENT, subtype=FIGHT_END)
+                return
+
             self.turn_counter += 1
 
             if self.turn_counter > 3:
