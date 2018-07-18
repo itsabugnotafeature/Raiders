@@ -7,7 +7,6 @@ from scripts import animations
 class BaseAI:
 
     def __init__(self, sprite):
-        self.abilities = sprite.abilities
         self.sprite = sprite
 
     def do_move(self, grid, path_manager):
@@ -67,19 +66,25 @@ class BaseMonsterAI(BaseAI):
         # TODO: consider making a SpriteAnimator class that the AI can delegate animation tasks to
         # Round numbers start at 1 and go to 3 so we subtract to avoid IndexError
         ability_pos -= 1
+
+        # Holds the chosen ability for other systems to get info from
+        active_ability = None
         try:
             if target == self.sprite.get_target():
-                self.sprite.threat_abilities[ability_pos].afflict(target)
-                try:
-                    engine.Animator.set_animation(self.sprite, self.abilities[ability_pos].animation)
-                except AttributeError:
-                    print("Failed to find animation for {}'s ability number {}.".format(self.sprite.name, ability_pos))
-                    print("Reverting to default animation,")
-                    engine.Animator.set_animation(self.sprite, animations.attack())
+                active_ability = self.sprite.threat_abilities[ability_pos]
             else:
-                self.sprite.no_threat_abilities[ability_pos].afflict(target)
+                active_ability = self.sprite.no_threat_abilities[ability_pos]
         except IndexError:
 
             # TODO: let it use abilities with multiple uses
             print("Error using {}'s number {} ability, reverting to number 1.".format(self.sprite.name, ability_pos))
-            self.sprite.no_threat_abilities[0].afflict(target)
+            active_ability = self.sprite.no_threat_abilities[0]
+
+        active_ability.afflict(target)
+
+        try:
+            engine.Animator.set_animation(self.sprite, active_ability.animation)
+        except AttributeError:
+            print("Failed to find animation for {}'s ability number {}.".format(self.sprite.name, ability_pos))
+            print("Reverting to default animation,")
+            engine.Animator.set_animation(self.sprite, animations.attack())

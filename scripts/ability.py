@@ -100,7 +100,7 @@ class dot(Effect):
     def update(self):
         if self.timer % self.tickinterval == 0:
             print(self.name + " did " + str(self.damagepertick) + " damage")
-            self.possessor.dodamage(self.damagepertick)
+            self.possessor.damage(self.damagepertick)
         if self.timer < self.duration or self.duration == -1:
             self.timer += 1
         else:
@@ -254,7 +254,7 @@ class basic_damage(action):
 
     def afflict(self, target):
         make_event(PRINT_LINE, message=self.playername + "'s [" + self.name + "] did " + str(self.damage) + " damage to " + target.name + ".")
-        target.dodamage(self.possessor.possessor, self.damage)
+        target.damage(self.possessor.possessor, self.damage)
         target.health_update()
 
 
@@ -265,7 +265,7 @@ class op_damage(action):
 
     def afflict(self, target):
         make_event(PRINT_LINE, message=self.playername + "'s [" + self.name + "] magically evaporated " + target.name + ".")
-        target.dodamage(self.possessor.possessor, target.health + 1)
+        target.damage(self.possessor.possessor, target.health + 1)
         target.health_update()
 
 

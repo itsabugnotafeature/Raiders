@@ -41,7 +41,7 @@ class GUI(BaseSystem):
 
         self.active_highlight = pygame.Surface(scripts.tools.get_square_size(70))
         self.active_highlight.fill(Color.LightGreen)
-        scripts.tools.outline_square(self.active_highlight, Color.YellowGreen, 4)
+        scripts.tools.outline_square(self.active_highlight, Color.YellowGreen, 3)
         self.active_highlight.set_colorkey(Color.Black)
         self.active_highlight = pygame.transform.rotate(self.active_highlight, -45)
 
@@ -60,7 +60,7 @@ class GUI(BaseSystem):
         self.friendly_highlight.convert()
         self.active_highlight.convert()
 
-        self.active_highlight = highlights.BlinkingTile(self.active_highlight, (100, 200, 70))
+        self.active_highlight = highlights.BlinkingTile(self.active_highlight, (80, 210, 108))
 
         self.gui_list.append(scripts.gui_elements.ScrollingTextBox((4, self.Engine.window_height - 234, 400, 196),
                                                                    self.GUITheme))

@@ -89,7 +89,7 @@ class Sprite:
     def __repr__(self):
         return self.name
 
-    def dodamage(self, source, value):
+    def damage(self, source, value):
         self.health -= value
 
     def dohealing(self, value):
@@ -142,8 +142,8 @@ class Monster(Sprite):
         self.AI = sprite_ai.BaseMonsterAI(self)
         self.ThreatManager = sprite_threat.ThreatManager(self)
 
-    def dodamage(self, source, value):
-        super().dodamage(source, value)
+    def damage(self, source, value):
+        super().damage(source, value)
         self.target = self.ThreatManager.do_threat_update(source, value)
 
     # Ability_pos should always be the round number when using this method on an instance of Monster
