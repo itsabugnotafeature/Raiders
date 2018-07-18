@@ -118,7 +118,7 @@ class hot(Effect):
     def update(self):
         if self.timer % self.tickinterval == 0:
             print(self.name + " healed for " + str(self.healpertick))
-            self.possessor.dohealing(self.healpertick)
+            self.possessor.heal(self.healpertick)
         if self.timer < self.duration or self.duration == -1:
             self.timer += 1
         else:

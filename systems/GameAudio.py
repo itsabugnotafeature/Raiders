@@ -2,13 +2,11 @@ from scripts.variables.localvars import *
 from systems.BaseSystem import BaseSystem
 
 
-class GameSound(BaseSystem):
+class GameAudio(BaseSystem):
 
     def __init__(self):
         self.Engine = None
         self.game_vars = []
-        self.fight_sound = pygame.mixer.Sound("sounds//fight//sword_clash.wav")
-        self.fight_sound.set_volume(.3)
 
         self.base_channel = None
         self.fight_channel1 = None
@@ -41,11 +39,6 @@ class GameSound(BaseSystem):
 
     def set_up(self):
         self.init_channels()
-
-    def handle_event(self, event):
-        if event.type == FIGHT_EVENT:
-            if event.subtype == ACTION:
-                self.fight_channel1.play(self.fight_sound, 0, 1300, 50)
 
     def main_loop(self):
         pass
@@ -86,3 +79,44 @@ class GameSound(BaseSystem):
 
         for key, value in kwargs:
             self.all_channels[key].set_volume(value)
+
+    def play_sound(self, sound, channel_set=None, priority=-1):
+        # channel_set lets you pick what list of channels to play from, defaults to self.misc_channels
+        # it will find the first channel that isn't busy, failing that it will find the first channel that isn't queued,
+        # failing that, if your priority is greater than 0 it will force it to play on the respective channel in that
+        # channel set (the higher the priority the less likely to be overridden), otherwise the sound won't play and
+        # an error message will print out.
+        if channel_set in [None, "misc", 3, "3", "-1", -1]:
+            channel, force = self.get_open_channel(self.misc_channels, priority)
+        elif channel_set in ["fight", "fight_channels", 0, "0"]:
+            channel, force = self.get_open_channel(self.fight_channels, priority)
+        elif channel_set in ["back", "music", 1, "1", "back_music", "back_music_channels"]:
+            channel, force = self.get_open_channel(self.back_music_channels, priority)
+        elif channel_set in ["sfx", "sound_effect_channels", 2, "2", "sound_effect"]:
+            channel, force = self.get_open_channel(self.sound_effect_channels, priority)
+        elif channel_set in["base", "base_channel"]:
+            channel, force = self.base_channel, not self.base_channel.busy()
+        else:
+            channel, force = self.get_open_channel(self.misc_channels, priority)
+
+        if force and channel:
+            channel.play(sound)
+        elif channel:
+            channel.queue(sound)
+        else:
+            print("Error finding channel in channel set '{}' with priority {}".format(channel_set, priority))
+            print("Not playing {}".format(sound))
+
+    def get_open_channel(self, channel_set, priority):
+        for c in channel_set:
+            if not c.get_busy():
+                return c, True
+        else:
+            for c in channel_set:
+                if not c.get_queue():
+                    return c, False
+            else:
+                if priority > 0:
+                    return channel_set[max(-len(channel_set), -priority)], True
+                else:
+                    return False, False

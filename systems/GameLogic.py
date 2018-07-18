@@ -181,7 +181,7 @@ class Logic(BaseSystem):
 
     def monster_loop(self):
         if self.game_vars[GAME_STATE] == PATHING:
-            self.path = self.active_sprite.AI.do_move(self.grid, self.PathManager)
+            self.path = self.active_sprite.get_move(self.grid, self.PathManager)
 
             make_event(PRINT_LINE, message=self.active_sprite.name + " moves to " + str(self.path[-1]))
 
@@ -252,6 +252,7 @@ class Logic(BaseSystem):
                 self.game_vars[GAME_STATE] = TURN_RESET
 
         if self.game_vars[GAME_STATE] == IN_FIGHT:
+            # GAME_STATE reset to TURN_RESET in FightManager
             pass
 
     def handle_event(self, event):

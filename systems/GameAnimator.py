@@ -36,3 +36,6 @@ class Animator(BaseSystem):
 
     def set_animation(self, sprite, animation):
         self.animation_dict[sprite] = animation
+
+    def remove_sprite(self, sprite):
+        self.animation_dict.pop(sprite)

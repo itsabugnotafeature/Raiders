@@ -1,6 +1,6 @@
 import math
 
-from systems import GameAnimator, GameGUI, GameLogic, GameRenderer, GameSound
+from systems import GameAnimator, GameGUI, GameLogic, GameRenderer, GameAudio
 import scripts.sprite_class
 
 from scripts.variables.localvars import *
@@ -10,8 +10,7 @@ import ast
 
 class GameEngine:
 
-    def __init__(self, window, logic_system=GameLogic.Logic(), gui_system=GameGUI.GUI(),
-                 renderer_system=GameRenderer.Renderer(), **kwargs):
+    def __init__(self, window, **kwargs):
 
         # Engine variables (Don't touch)
         self.font = pygame.font.SysFont("lucidaconsole", 18, True)
@@ -44,13 +43,13 @@ class GameEngine:
                 self.game_vars[SPRITE_LIST] = value
 
         # System pointers
-        self.Logic = logic_system
-        self.GUI = gui_system
+        self.Logic = GameLogic.Logic()
+        self.GUI = GameGUI.GUI()
         self.Animator = GameAnimator.Animator()
-        self.GameSound = GameSound.GameSound()
-        self.Renderer = renderer_system
+        self.Audio = GameAudio.GameAudio()
+        self.Renderer = GameRenderer.Renderer()
 
-        self.systems_list = [self.Logic, self.GUI, self.Animator, self.GameSound, self.Renderer]
+        self.systems_list = [self.Logic, self.GUI, self.Animator, self.Audio, self.Renderer]
 
         for system in self.systems_list:
             system.init(self)
@@ -139,8 +138,6 @@ class GameEngine:
                     self.GUI.handle_event(event)
                 if event.subtype == FIGHT_END:
                     self.GUI.handle_event(event)
-                if event.subtype == ACTION:
-                    self.GameSound.handle_event(event)
                 self.Logic.handle_event(event)
 
             if event.type == PRINT_LINE:

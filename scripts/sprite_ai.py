@@ -3,6 +3,18 @@ from scripts import sprite_class
 import random
 from scripts import animations
 
+"""
+The AI classes provide a collection of helpful decision makers for sprites.
+Each method takes in some parameters and returns the desired object back to its sprite.
+Possible subclasses:
+    BossAI:
+        provides support for multiple stages of abilities
+    TimidAI:
+        an AI that runs away under certain circumstances
+    ConditionalAI:
+        behaves like normal but if certain circumstances are met it will use preset abilities
+"""
+
 
 class BaseAI:
 
@@ -12,7 +24,7 @@ class BaseAI:
     def do_move(self, grid, path_manager):
         pass
 
-    def do_attack(self, target, ability_pos, engine):
+    def get_attack(self, target, ability_pos, engine):
         pass
 
 
@@ -62,13 +74,11 @@ class BaseMonsterAI(BaseAI):
             return True
 
     # Ability_pos should always be the round number
-    def do_attack(self, target, ability_pos, engine):
+    def get_attack(self, target, ability_pos, engine):
         # TODO: consider making a SpriteAnimator class that the AI can delegate animation tasks to
         # Round numbers start at 1 and go to 3 so we subtract to avoid IndexError
         ability_pos -= 1
 
-        # Holds the chosen ability for other systems to get info from
-        active_ability = None
         try:
             if target == self.sprite.get_target():
                 active_ability = self.sprite.threat_abilities[ability_pos]
@@ -77,14 +87,7 @@ class BaseMonsterAI(BaseAI):
         except IndexError:
 
             # TODO: let it use abilities with multiple uses
-            print("Error using {}'s number {} ability, reverting to number 1.".format(self.sprite.name, ability_pos))
             active_ability = self.sprite.no_threat_abilities[0]
+            print("Error using {}'s [{}] ability, reverting to number 1.".format(self.sprite.name, active_ability.name))
 
-        active_ability.afflict(target)
-
-        try:
-            engine.Animator.set_animation(self.sprite, active_ability.animation)
-        except AttributeError:
-            print("Failed to find animation for {}'s ability number {}.".format(self.sprite.name, ability_pos))
-            print("Reverting to default animation,")
-            engine.Animator.set_animation(self.sprite, animations.attack())
+        return active_ability

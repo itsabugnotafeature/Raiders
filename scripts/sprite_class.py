@@ -4,7 +4,8 @@ from scripts import sprite_threat
 from scripts import animations
 from scripts.Colors import Color
 from scripts import tools
-#import scripts.gui_elements.DisplayWindow
+from scripts import sprite_animator
+from scripts import sprite_sfx
 
 # TODO: generate getter/setter methods for all traits so that abilities can edit/reset them
 
@@ -46,6 +47,8 @@ class Sprite:
 
         # ANIMATION LOGIC
         self.did_tick = False
+        self.SpriteAnimator = sprite_animator.SpriteAnimator(self)
+        self.SFXPlayer = sprite_sfx.SFXPlayer(self)
 
     def render_name(self, font, theme):
         self.name_img = font.render(self.name, False, theme.accent3)
@@ -62,17 +65,14 @@ class Sprite:
 
     def use(self, abilitypos, target, engine):
         if self.fightable:
-            if abilitypos > len(self.abilities):
-                make_event(PRINT_LINE, message=self.name + " doesn't have enough abilities...")
-                self.abilities[-1].afflict(target)
-            else:
-                self.abilities[abilitypos].afflict(target)
-            try:
-                engine.Animator.set_animation(self, self.abilities[abilitypos].animation)
-            except AttributeError:
-                print("Failed to find animation for {}'s ability number {}.".format(self.name, abilitypos))
-                print("Reverting to default animation")
-                engine.Animator.set_animation(self, animations.attack())
+
+            # The chosen ability
+            active_ability = self.get_attack(abilitypos)
+
+            # TODO: .afflict() should return a boolean to tell if
+            active_ability.afflict(target)
+            self.SpriteAnimator.use(active_ability, engine.Animator)
+            self.SFXPlayer.use(active_ability, engine.Audio)
         else:
             make_event(PRINT_LINE, message="{} can't attack while dead.".format(self.name), color=Color.Red)
 
@@ -92,11 +92,19 @@ class Sprite:
     def damage(self, source, value):
         self.health -= value
 
-    def dohealing(self, value):
+    def heal(self, value):
         self.health += value
 
     def face(self, pos):
         self.facing = tools.get_facing(self.pos, pos, self.facing)
+
+    def get_attack(self, ability_pos):
+        try:
+            active_ability = self.abilities[ability_pos]
+        except IndexError:
+            active_ability = self.abilities[0]
+            print("Error using {}'s [{}] ability, reverting to number 1.".format(self.name, active_ability.name))
+        return active_ability
 
 
 class Player(Sprite):
@@ -124,7 +132,7 @@ class Player(Sprite):
 
 
 class Monster(Sprite):
-    def __init__(self, name, class_, picloc, pos, abilities=[]):
+    def __init__(self, name, class_, picloc, pos, abilities=None):
         super().__init__(name, class_, picloc, pos)
         self.type = "monster"
         self.target = None
@@ -132,12 +140,17 @@ class Monster(Sprite):
         self.health = 20
 
         # Both of these ability lists should be exactly 3 items long and contain only Ability classes
-        self.threat_abilities = [melee_attack("Execute", self, (basic_damage("", 5),), ("heavy",), uses=3),
-                                 melee_attack("Execute", self, (basic_damage("", 5),), ("heavy",), uses=3),
-                                 melee_attack("Execute", self, (basic_damage("", 5),), ("heavy",), uses=3)]
-        self.no_threat_abilities = [melee_attack("Light", self, (basic_damage("", 1),), ("light",)),
-                                    melee_attack("Light", self, (basic_damage("", 1),), ("light",)),
-                                    melee_attack("Light", self, (basic_damage("", 1),), ("light",))]
+        if abilities is not None:
+            self.threat_abilities = abilities[0:3]
+            self.no_threat_abilities = abilities[3:6]
+        else:
+
+            self.threat_abilities = [melee_attack("Execute", self, (basic_damage("", 5),), ("heavy",), uses=3),
+                                     melee_attack("Execute", self, (basic_damage("", 5),), ("heavy",), uses=3),
+                                     melee_attack("Execute", self, (basic_damage("", 5),), ("heavy",), uses=3)]
+            self.no_threat_abilities = [melee_attack("Light", self, (basic_damage("", 1),), ("light",)),
+                                        melee_attack("Light", self, (basic_damage("", 1),), ("light",)),
+                                        melee_attack("Light", self, (basic_damage("", 1),), ("light",))]
 
         self.AI = sprite_ai.BaseMonsterAI(self)
         self.ThreatManager = sprite_threat.ThreatManager(self)
@@ -149,7 +162,12 @@ class Monster(Sprite):
     # Ability_pos should always be the round number when using this method on an instance of Monster
     def use(self, ability_pos, target, engine):
         if self.fightable:
-            self.AI.do_attack(target, ability_pos, engine)
+            active_ability = self.AI.get_attack(target, ability_pos, engine)
+
+            active_ability.afflict(target)
+            self.SpriteAnimator.use(active_ability, engine.Animator)
+            self.SFXPlayer.use(active_ability, engine.Audio)
+
         else:
             make_event(PRINT_LINE, message="{} can't attack while dead.".format(self.name), color=Color.Red)
 
@@ -158,3 +176,6 @@ class Monster(Sprite):
 
     def set_target(self, target):
         self.target = target
+
+    def get_move(self, grid, path_manager):
+        return self.AI.do_move(grid, path_manager)
