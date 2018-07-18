@@ -48,6 +48,8 @@ class Sprite:
         # ANIMATION LOGIC
         self.did_tick = False
         self.SpriteAnimator = sprite_animator.SpriteAnimator(self)
+
+        # SOUND
         self.SFXPlayer = sprite_sfx.SFXPlayer(self)
 
     def render_name(self, font, theme):
@@ -63,18 +65,13 @@ class Sprite:
         else:
             return False
 
-    def use(self, abilitypos, target, engine):
-        if self.fightable:
-
-            # The chosen ability
-            active_ability = self.get_attack(abilitypos)
-
-            # TODO: .afflict() should return a boolean to tell if
+    def use(self, active_ability, target, outcome, engine):
+        if not outcome["death_blocked"]:
             active_ability.afflict(target)
             self.SpriteAnimator.use(active_ability, engine.Animator)
             self.SFXPlayer.use(active_ability, engine.Audio)
         else:
-            make_event(PRINT_LINE, message="{} can't attack while dead.".format(self.name), color=Color.Red)
+            make_event(PRINT_LINE, message="{} can't attack while dead.".format(self.name), color=Color.DarkRed)
 
     def health_update(self):
         if self.health <= 0:
@@ -98,9 +95,11 @@ class Sprite:
     def face(self, pos):
         self.facing = tools.get_facing(self.pos, pos, self.facing)
 
-    def get_attack(self, ability_pos):
+    # When using get_attack on any non Monster Sprite ability_num should be the index of the desired ability in that
+    # sprites abilities list
+    def get_attack(self, target, ability_num):
         try:
-            active_ability = self.abilities[ability_pos]
+            active_ability = self.abilities[ability_num]
         except IndexError:
             active_ability = self.abilities[0]
             print("Error using {}'s [{}] ability, reverting to number 1.".format(self.name, active_ability.name))
@@ -116,8 +115,9 @@ class Player(Sprite):
             self.abilities = ["light", "light", "heavy", "sweep", "block", "parry", "counter"]
         if pclass.lower() == "tank":
             self.abilities = [melee_attack("Execute", self, (basic_damage("", 5),), ("heavy",), uses=3),
-                              melee_attack("OP BS", self, (op_damage(""),), ("magic",),
-                                           "{1} is killed by the architects!"),
+                              melee_attack("Sound Test", self, (op_damage(""),), ("magic",),
+                                           "{1} is killed by the architects!",
+                                           sound=pygame.mixer.Sound("sounds/fight/eerie_magic.wav")),
                               melee_attack("Light", self, (basic_damage("", 1),), ("light",), uses=3),
                               melee_attack("Execute", self, (basic_damage("", 5),), ("heavy",), uses=3),
                               melee_attack("OP BS", self, (op_damage(""),), ("magic",),
@@ -159,18 +159,6 @@ class Monster(Sprite):
         super().damage(source, value)
         self.target = self.ThreatManager.do_threat_update(source, value)
 
-    # Ability_pos should always be the round number when using this method on an instance of Monster
-    def use(self, ability_pos, target, engine):
-        if self.fightable:
-            active_ability = self.AI.get_attack(target, ability_pos, engine)
-
-            active_ability.afflict(target)
-            self.SpriteAnimator.use(active_ability, engine.Animator)
-            self.SFXPlayer.use(active_ability, engine.Audio)
-
-        else:
-            make_event(PRINT_LINE, message="{} can't attack while dead.".format(self.name), color=Color.Red)
-
     def get_target(self):
         return self.target
 
@@ -179,3 +167,7 @@ class Monster(Sprite):
 
     def get_move(self, grid, path_manager):
         return self.AI.do_move(grid, path_manager)
+
+    # When using get_attack on an instance of Monster the first parameter should always be the turn number of the fight
+    def get_attack(self, target, turn_num):
+        return self.AI.get_attack(target, turn_num)

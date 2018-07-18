@@ -178,13 +178,15 @@ class block(ability):
 
 class melee_attack(ability):
 
-    def __init__(self, name, possessor, actions, flags=(), k_message=None, uses=1):
+    def __init__(self, name, possessor, actions, flags=(), k_message=None, uses=1, sound=None):
         super().__init__(name, possessor, actions, flags, uses)
         self.type = "melee"
         if k_message:
             self.kill_message = k_message
         else:
             self.kill_message = "{0} slashes {1} to death!"
+
+        self.sound = sound
 
     def afflict(self, target):
         for action in self.actions:

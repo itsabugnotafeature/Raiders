@@ -11,8 +11,13 @@ class SFXPlayer:
     def use(self, ability, audio_player):
 
         try:
-            audio_player.play(ability.sound)
+            audio_player.play(ability.sound, channel_set="fight")
         except AttributeError:
-            print("Error playing sound for {}'s [{}] ability, no sound found".format(self.sprite.name, ability))
-            print("Reverting to default sound.")
-            audio_player.play_sound(self.default_ability_sound, channel_set="fight")
+            self.default_sound(ability, audio_player)
+        except TypeError:
+            self.default_sound(ability, audio_player)
+
+    def default_sound(self, ability,  audio_player):
+        channel_id = audio_player.play(self.default_ability_sound, channel_set="fight")
+        print("SOUND: Error playing sound for {}'s [{}] ability, no sound found".format(self.sprite.name, ability))
+        print("SOUND: Reverting to default sound on channel {}.".format(channel_id))

@@ -72,15 +72,18 @@ class GameAudio(BaseSystem):
 
         self.set_channels_volumes()
 
-    def set_channels_volumes(self, **kwargs):
+    def set_channels_volumes(self, volume=None, **kwargs):
 
         for channel in self.all_channels:
-            channel.set_volume(.5, .5)
+            if volume is None:
+                channel.set_volume(.5, .5)
+            else:
+                channel.set_volume(volume, volume)
 
         for key, value in kwargs:
             self.all_channels[key].set_volume(value)
 
-    def play_sound(self, sound, channel_set=None, priority=-1):
+    def play(self, sound, channel_set=None, priority=-1):
         # channel_set lets you pick what list of channels to play from, defaults to self.misc_channels
         # it will find the first channel that isn't busy, failing that it will find the first channel that isn't queued,
         # failing that, if your priority is greater than 0 it will force it to play on the respective channel in that
@@ -101,11 +104,14 @@ class GameAudio(BaseSystem):
 
         if force and channel:
             channel.play(sound)
+            return self.all_channels.index(channel)
         elif channel:
             channel.queue(sound)
+            return self.all_channels.index(channel)
         else:
-            print("Error finding channel in channel set '{}' with priority {}".format(channel_set, priority))
-            print("Not playing {}".format(sound))
+            print("AUDIO: Error finding channel in channel set '{}' with priority {}".format(channel_set, priority))
+            print("AUDIO: Not playing {}".format(sound))
+            return None
 
     def get_open_channel(self, channel_set, priority):
         for c in channel_set:

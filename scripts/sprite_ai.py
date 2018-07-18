@@ -24,7 +24,7 @@ class BaseAI:
     def do_move(self, grid, path_manager):
         pass
 
-    def get_attack(self, target, ability_pos, engine):
+    def get_attack(self, target, ability_pos):
         pass
 
 
@@ -73,17 +73,17 @@ class BaseMonsterAI(BaseAI):
             self.last_goal = spot
             return True
 
-    # Ability_pos should always be the round number
-    def get_attack(self, target, ability_pos, engine):
+    # Ability_pos should always be the turn number
+    def get_attack(self, target, turn_num):
         # TODO: consider making a SpriteAnimator class that the AI can delegate animation tasks to
-        # Round numbers start at 1 and go to 3 so we subtract to avoid IndexError
-        ability_pos -= 1
+        # Turn numbers start at 1 and go to 3 so we subtract to avoid IndexError
+        turn_num -= 1
 
         try:
             if target == self.sprite.get_target():
-                active_ability = self.sprite.threat_abilities[ability_pos]
+                active_ability = self.sprite.threat_abilities[turn_num]
             else:
-                active_ability = self.sprite.no_threat_abilities[ability_pos]
+                active_ability = self.sprite.no_threat_abilities[turn_num]
         except IndexError:
 
             # TODO: let it use abilities with multiple uses
