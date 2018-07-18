@@ -5,9 +5,6 @@ class ThreatManager:
         self.monster = monster
         self.threat_table = threat_table
 
-        # important for setting the default threat of the sprite to nothing
-        return None
-
     def do_threat_update(self, source, value):
         if source not in self.threat_table:
             self.threat_table[source] = value
@@ -23,8 +20,18 @@ class ThreatManager:
         return self.threat_table
 
     def get_target(self):
+        self.threat_table_clean_up()
+
         target = list(self.threat_table.keys())[0]
         for source in self.threat_table.keys():
             if self.threat_table[source] > self.threat_table[target]:
                 target = source
         return target
+
+    def threat_table_clean_up(self):
+        pop_list = []
+        for source in self.threat_table.keys():
+            if source is not None and not source.fightable:
+                pop_list.append(source)
+        for source in pop_list:
+            self.threat_table.pop(source)

@@ -3,6 +3,7 @@ from scripts import sprite_ai
 from scripts import sprite_threat
 from scripts import animations
 from scripts.Colors import Color
+from scripts import tools
 #import scripts.gui_elements.DisplayWindow
 
 # TODO: generate getter/setter methods for all traits so that abilities can edit/reset them
@@ -70,7 +71,7 @@ class Sprite:
                 engine.Animator.set_animation(self, self.abilities[abilitypos].animation)
             except AttributeError:
                 print("Failed to find animation for {}'s ability number {}.".format(self.name, abilitypos))
-                print("Revertingto default animation")
+                print("Reverting to default animation")
                 engine.Animator.set_animation(self, animations.attack())
         else:
             make_event(PRINT_LINE, message="{} can't attack while dead.".format(self.name), color=Color.Red)
@@ -93,6 +94,9 @@ class Sprite:
 
     def dohealing(self, value):
         self.health += value
+
+    def face(self, pos):
+        self.facing = tools.get_facing(self.pos, pos, self.facing)
 
 
 class Player(Sprite):

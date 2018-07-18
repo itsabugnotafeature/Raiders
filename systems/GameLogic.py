@@ -154,6 +154,7 @@ class Logic(BaseSystem):
                 for sprite in self.game_vars[SPRITE_LIST]:
                     if sprite.pos == self.game_vars[ADJUSTED_RMOUSE_POS]:
                         if sprite != self.active_sprite:
+                            sprite.face(self.active_sprite.pos)
                             # TODO: check if the target is in range for any of the players abilities, if so which ones?
                             if sprite.type == "monster" or self.game_vars[FRIENDLY_FIRE]:
                                 make_event(PRINT_LINE, message=self.active_sprite.name + " attacks " + sprite.name)
@@ -173,12 +174,7 @@ class Logic(BaseSystem):
 
                             self.game_vars[GAME_STATE] = IN_FIGHT
                             break
-                self.active_sprite.facing = tools.get_facing_vector(self.active_sprite.pos,
-                                                                    self.active_target.pos,
-                                                                    self.active_sprite.facing)
-                self.active_target.facing = tools.get_facing_vector(self.active_target.pos,
-                                                                    self.active_sprite.pos,
-                                                                    self.active_target.facing)
+                self.active_sprite.face(self.game_vars[ADJUSTED_RMOUSE_POS])
 
         if self.game_vars[GAME_STATE] == IN_FIGHT:
             pass
@@ -235,12 +231,6 @@ class Logic(BaseSystem):
                         self.active_sprite.last_pos = self.active_sprite.pos
                         self.game_vars[GAME_STATE] = ATTACKING
                         self.path_index = 0
-                        try:
-                            self.active_sprite.facing = tools.get_facing_vector(self.active_sprite.pos,
-                                                                                self.active_sprite.target.pos,
-                                                                                self.active_sprite.facing)
-                        except AttributeError:
-                            pass
                     else:
                         self.path_index += 1
 
@@ -249,6 +239,9 @@ class Logic(BaseSystem):
                 self.active_target = self.active_sprite.get_target()
                 self.player = self.active_target
                 self.monster = self.active_sprite
+
+                self.active_sprite.face(self.active_target.pos)
+                self.active_target.face(self.active_sprite.pos)
 
                 make_event(PRINT_LINE, message=self.active_sprite.name + " attacks " + self.active_target.name)
                 make_event(FIGHT_EVENT, subtype=FIGHT_BEGIN, player=self.active_target, monster=self.active_sprite)
@@ -274,6 +267,10 @@ class Logic(BaseSystem):
         if not self.game_vars[PAUSE]:
             if self.game_vars[GAME_STATE] == TURN_RESET:
                 self.game_vars[ACTIVE_SPRITE] = self.game_vars[SPRITE_LIST][self.sprite_counter]
+                if not self.game_vars[ACTIVE_SPRITE].fightable:
+                    self.sprite_counter = (self.sprite_counter + 1) % len(self.game_vars[SPRITE_LIST])
+                    self.game_vars[GAME_STATE] = TURN_RESET
+                    return
                 self.active_sprite = self.game_vars[ACTIVE_SPRITE]
                 self.sprite_counter = (self.sprite_counter + 1) % len(self.game_vars[SPRITE_LIST])
                 self.movable_list = [self.active_sprite.pos]

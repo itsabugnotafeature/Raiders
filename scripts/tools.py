@@ -11,7 +11,7 @@ def tup_round(tuple, digits=0):
     return round(tuple[0], digits), round(tuple[1], digits)
 
 
-def get_facing_vector(pos1, pos2, original_facing):
+def get_facing(pos1, pos2, original_facing):
     # Gets the difference between the two positions
     vector = (pos2[0] - pos1[0], pos2[1] - pos1[1])
 
@@ -145,7 +145,6 @@ def gen_idle_text():
 def get_square_size(hypotenuse):
     side_length = hypotenuse / math.sqrt(2)
     side_length = int(side_length)
-    print(side_length)
     return side_length, side_length
 
 
