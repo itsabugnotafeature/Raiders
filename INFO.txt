@@ -9,6 +9,7 @@ TO DO:
 	AI: movement, ability usage (animation type things, text bubbles, cut scenes)
 	Background for maps
 	Finish full tile-set: brush cover in lower left, volcano top right, and whatever else
+	Animations for combat idle, alternate attack animations, casting animation, death and dead animations
 
   !:
 	Create a file save and load class
