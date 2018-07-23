@@ -41,7 +41,7 @@ class GUI(BaseSystem):
 
         self.active_highlight = pygame.Surface(scripts.tools.get_square_size(70))
         self.active_highlight.fill(Color.LightGreen)
-        scripts.tools.outline_square(self.active_highlight, Color.YellowGreen, 3)
+        scripts.tools.outline_square(self.active_highlight, Color.YellowGreen, 6)
         self.active_highlight.set_colorkey(Color.Black)
         self.active_highlight = pygame.transform.rotate(self.active_highlight, -45)
 

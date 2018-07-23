@@ -148,12 +148,11 @@ def get_square_size(hypotenuse):
     return side_length, side_length
 
 
-def outline_square(surface, color, width, offset=(0, 0)):
+def outline_square(surface, color, width):
     side_length = surface.get_width()
 
     # Prevents part of the rect from cut off
-    side_length -= width
-    pygame.draw.rect(surface, color, (width/2+offset[0], width/2+offset[1], side_length, side_length), width)
+    pygame.draw.rect(surface, color, (0, 0, side_length-1, side_length-1), width)
 
 
 def center_offset(inner_dims, outer_dims):
