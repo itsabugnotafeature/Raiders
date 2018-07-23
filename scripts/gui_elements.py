@@ -403,7 +403,6 @@ class Button:
         self.state = BASE_STATE
 
         self.play_sound = False
-        self.sound = pygame.mixer.Sound("sounds/gui/button_click.wav")
 
         self.blit_image = self.base_image.copy()
 
@@ -443,14 +442,13 @@ class Button:
         elif event.type == pygame.MOUSEMOTION:
             if self.in_bounds(event.pos) and self.state != DISABLED:
                 self.state = HOVERED
-            elif self.state == HOVERED and self.state != DISABLED:
+            elif self.state == HOVERED:
+                # If the button is hovered but the mouse isn't on it
                 self.state = BASE_STATE
         self.update_blit_image()
 
     def update(self, engine):
-        if self.play_sound:
-            self.play_sound = False
-            engine.Audio.play(self.sound, "gui")
+        pass
 
     def use_action(self):
         if self.action is not None:
