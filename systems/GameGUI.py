@@ -101,11 +101,8 @@ class GUI(BaseSystem):
         for i in range(len(player.abilities)):
             button_x = 580 + i % 4 * 135
             button_y = 740 + (int(i / 4)) * 110
-            self.gui_list.append(scripts.gui_elements.AbilityButton((button_x, button_y), i, self.GUITheme,
-                                                                    player.abilities[i].name,
-                                                                    image="icon_set_02",
-                                                                    image_pos=(289, 487),
-                                                                    uses=player.abilities[i].uses))
+            self.gui_list.append(scripts.gui_elements.AbilityButton((button_x, button_y),
+                                                                    i, player.abilities[i], self.GUITheme))
             self.fight_gui_addresses.append(len(self.gui_list) - 1)
 
     def pause_clean_up(self):

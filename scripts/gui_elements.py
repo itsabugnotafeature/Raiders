@@ -403,6 +403,8 @@ class Button:
         self.state = BASE_STATE
 
         self.play_sound = False
+        self.sound = pygame.mixer.Sound("sounds/gui/gui_passover.wav")
+        self.sound.set_volume(.4)
 
         self.blit_image = self.base_image.copy()
 
@@ -441,6 +443,9 @@ class Button:
                 self.use_action()
         elif event.type == pygame.MOUSEMOTION:
             if self.in_bounds(event.pos) and self.state != DISABLED:
+                if self.state != HOVERED:
+                    # If this is the first time the mouse is moving on it
+                    self.play_sound = True
                 self.state = HOVERED
             elif self.state == HOVERED:
                 # If the button is hovered but the mouse isn't on it
@@ -448,7 +453,9 @@ class Button:
         self.update_blit_image()
 
     def update(self, engine):
-        pass
+        if self.play_sound:
+            self.play_sound = False
+            engine.Audio.play(self.sound)
 
     def use_action(self):
         if self.action is not None:
@@ -459,25 +466,33 @@ class Button:
 
 class AbilityButton(Button):
 
-    def __init__(self, pos, action_num, theme, text="", image_pos=(0, 0), image=None, uses=1):
+    def __init__(self, pos, action_num, ability, theme):
         # TODO: change AbilityButton to parse parameters from Ability class
         super().__init__((pos[0], pos[1], 96, 96), theme, make_event,
-                         {"type": FIGHT_EVENT, "subtype": ACTION, "num": action_num}, text,
+                         {"type": FIGHT_EVENT, "subtype": ACTION, "num": action_num}, ability.name,
                          "semi_rounded_gui")
-        self.uses = uses
+        self.uses = ability.uses
 
-        self.text = text
+        self.text = ability.name
 
-        if image is not None:
-            temp_image = pygame.image.load("graphics//gui_images//ability_icons//"+image+".png")
+        try:
+            ability_image = ability.image
+        except AttributeError:
+            print("GUI_ELEMENTS: No image found for [{}] ability.".format(ability))
+            print("GUI_ELEMENTS: Reverting to default image.")
+            # TODO: fix the error handling here
+            ability_image = None
+
+        if ability_image is None:
+            temp_image = pygame.image.load("graphics//gui_images//ability_icons//icon_set_02.png")
             temp_image.set_colorkey((255, 0, 128))
             temp_surf = pygame.Surface((20, 20))
-            temp_surf.blit(temp_image, (0, 0), (image_pos[0], image_pos[1], 20, 20))
+            temp_surf.blit(temp_image, (0, 0), (289, 487, 20, 20))
             temp_surf = pygame.transform.scale(temp_surf, (80, 80))
             self.base_image.blit(temp_surf, (8, 8))
             self.remove_corners()
 
-        text_image = self.prepare_text(text)
+        text_image = self.prepare_text(self.text)
         self.base_image.blit(text_image, ((self.width - self.text_img.get_width()) / 2,
                                              (self.height-25)))
 
@@ -539,6 +554,9 @@ class AbilityButton(Button):
         if self.state == HOVERED:
             pos = pygame.mouse.get_pos()
             make_event(SURFACE, surf=self.prepare_text(self.text), pos=(pos[0], pos[1]-25), z=2)
+        if self.play_sound:
+            self.play_sound = False
+            engine.Audio.play(self.sound)
 
 
 class DisplayBox:
