@@ -7,3 +7,5 @@ sword_scrape.wav https://freesound.org/people/FunWithSound/sounds/361485/
 sword_clash.wav https://freesound.org/people/FunWithSound/sounds/361482/
 	converted to .wav with iTunes
 	license: Creative Commons 0
+sheild_block: https://freesound.org/people/nekoninja/sounds/370203/
+	license: Creative Commons 0

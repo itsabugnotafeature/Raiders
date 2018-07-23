@@ -188,7 +188,7 @@ class melee_attack(ability):
 
         self.sound = sound
 
-    def afflict(self, target):
+    def afflict(self, target, blocked=False):
         for action in self.actions:
             action.afflict(target)
         if target.health > 0:

@@ -403,6 +403,7 @@ class Button:
         self.state = BASE_STATE
 
         self.play_sound = False
+        # TODO: optimize this, they obviously don't need to load the sound individually
         self.sound = pygame.mixer.Sound("sounds/gui/gui_passover.wav")
         self.sound.set_volume(.4)
 

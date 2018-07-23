@@ -70,11 +70,11 @@ class AbilityAnalyzer:
         pass
 
     def get_outcome(self, player, player_ability, monster, monster_ability):
-        player_outcome = {"block": False, "counter": False, "death_blocked": False, "effects": [], "actions": []}
+        player_outcome = {"block": False, "counter": False, "death_blocked": False}
         if not player.fightable:
             player_outcome["death_blocked"] = True
 
-        monster_outcome = {"block": False, "counter": False, "death_blocked": False, "effects": [], "actions": []}
+        monster_outcome = {"block": False, "counter": False, "death_blocked": False}
         if not monster.fightable:
             monster_outcome["death_blocked"] = True
 

@@ -66,12 +66,15 @@ class Sprite:
             return False
 
     def use(self, active_ability, target, outcome, engine):
-        if not outcome["death_blocked"]:
+        # TODO: support for blocking abilities, if the ability is blocked do the blocked logic in the ability
+        if outcome["death_blocked"]:
+            make_event(PRINT_LINE, message="{} can't attack while dead.".format(self.name), color=Color.DarkRed)
+        elif outcome["blocked"]:
+            pass
+        else:
             active_ability.afflict(target)
             self.SpriteAnimator.use(active_ability, engine.Animator)
             self.SFXPlayer.use(active_ability, engine.Audio)
-        else:
-            make_event(PRINT_LINE, message="{} can't attack while dead.".format(self.name), color=Color.DarkRed)
 
     def health_update(self):
         if self.health <= 0:
