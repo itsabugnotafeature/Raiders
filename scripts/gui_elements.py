@@ -402,6 +402,9 @@ class Button:
 
         self.state = BASE_STATE
 
+        self.play_sound = False
+        self.sound = pygame.mixer.Sound("sounds/gui/button_click.wav")
+
         self.blit_image = self.base_image.copy()
 
     def set_position(self, pos):
@@ -445,8 +448,9 @@ class Button:
         self.update_blit_image()
 
     def update(self, engine):
-        # Called every frame for buttons that need a constant update
-        pass
+        if self.play_sound:
+            self.play_sound = False
+            engine.Audio.play(self.sound, "gui")
 
     def use_action(self):
         if self.action is not None:

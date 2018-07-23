@@ -83,12 +83,9 @@ class GameAudio(BaseSystem):
         for key, value in kwargs:
             self.all_channels[key].set_volume(value)
 
-    def play(self, sound, channel_set=None, priority=-1):
+    def play(self, sound, channel_set=None, priority=HIGH):
         # channel_set lets you pick what list of channels to play from, defaults to self.misc_channels
-        # it will find the first channel that isn't busy, failing that it will find the first channel that isn't queued,
-        # failing that, if your priority is greater than 0 it will force it to play on the respective channel in that
-        # channel set (the higher the priority the less likely to be overridden), otherwise the sound won't play and
-        # an error message will print out.
+        # For a HIGH priority it will find the first find the first available channel, or make one available
         if channel_set in [None, "misc", 3, "3", "-1", -1]:
             channel, force = self.get_open_channel(self.misc_channels, priority)
         elif channel_set in ["fight", "fight_channels", 0, "0"]:
@@ -100,7 +97,8 @@ class GameAudio(BaseSystem):
         elif channel_set in["base", "base_channel"]:
             channel, force = self.base_channel, not self.base_channel.busy()
         else:
-            channel, force = self.get_open_channel(self.misc_channels, priority)
+            print("AUDIO: couldn't find channel for channel_set: {}".format(channel_set))
+            return
 
         if force and channel:
             channel.play(sound)

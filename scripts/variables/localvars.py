@@ -62,3 +62,10 @@ HOVERED = 1
 DISABLED = 2
 SELECTED = 4
 BASE_STATE = 5
+
+"""
+Priorities for GameAudio
+"""
+LOW = 0
+MEDIUM = 1
+HIGH = 2
