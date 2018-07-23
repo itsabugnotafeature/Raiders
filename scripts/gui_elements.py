@@ -433,9 +433,9 @@ class Button:
         if event.type == pygame.MOUSEBUTTONUP:
             if self.in_bounds(event.pos) and self.state != DISABLED:
                 try:
-                    print("Button '" + str(hash(self)) + "' created event of type: " + str(self.action_kwargs["type"]))
+                    print("GUI_ELEMENTS: Button '{}' created event of type {}.".format(str(hash(self)), str(self.action_kwargs["type"])))
                 except KeyError:
-                    print("Error parsing event type.")
+                    print("GUI ELEMENTS: Error parsing event type.")
                 self.use_action()
         elif event.type == pygame.MOUSEMOTION:
             if self.in_bounds(event.pos) and self.state != DISABLED:

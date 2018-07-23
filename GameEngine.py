@@ -1,17 +1,17 @@
 import math
 
-from systems import GameAnimator, GameGUI, GameLogic, GameRenderer, GameSound
+from systems import GameAnimator, GameGUI, GameLogic, GameRenderer, GameAudio
 import scripts.sprite_class
 
 from scripts.variables.localvars import *
 from scripts.variables.events import *
 import ast
+from scripts.Colors import Color
 
 
 class GameEngine:
 
-    def __init__(self, window, logic_system=GameLogic.Logic(), gui_system=GameGUI.GUI(),
-                 renderer_system=GameRenderer.Renderer(), **kwargs):
+    def __init__(self, window, **kwargs):
 
         # Engine variables (Don't touch)
         self.font = pygame.font.SysFont("lucidaconsole", 18, True)
@@ -32,7 +32,6 @@ class GameEngine:
             MOUSE_CLICKED: False, SKIP_SEQUENCE: False, FRIENDLY_FIRE: False, TYPING: False, DEBUG: True,
             GRID_OFFSET: (0, -30), FULL_SCREEN: True
         }
-
         # Using the keyword arguments
         for key, value in kwargs:
             if key == "wind_dim":
@@ -44,13 +43,13 @@ class GameEngine:
                 self.game_vars[SPRITE_LIST] = value
 
         # System pointers
-        self.Logic = logic_system
-        self.GUI = gui_system
+        self.Logic = GameLogic.Logic()
+        self.GUI = GameGUI.GUI()
         self.Animator = GameAnimator.Animator()
-        self.GameSound = GameSound.GameSound()
-        self.Renderer = renderer_system
+        self.Audio = GameAudio.GameAudio()
+        self.Renderer = GameRenderer.Renderer()
 
-        self.systems_list = [self.Logic, self.GUI, self.Animator, self.GameSound, self.Renderer]
+        self.systems_list = [self.Logic, self.GUI, self.Animator, self.Audio, self.Renderer]
 
         for system in self.systems_list:
             system.init(self)
@@ -58,6 +57,10 @@ class GameEngine:
         self.init()
 
     def init(self):
+
+        if not self.game_vars[FULL_SCREEN]:  # -or self.game_vars[DEBUG]:
+            self.display_window = pygame.display.set_mode((self.window_width, self.window_height))
+
         self.game_vars[OUTPUT_CONSOLE].print_line("Welcome to Raiders!", reward_message=True)
 
     def main_loop(self):
@@ -72,14 +75,11 @@ class GameEngine:
             if event.type == pygame.QUIT:
                 self.game_vars[QUIT_SEQUENCE] = True
 
-            # TODO: add support for a windowed mode
-            # if event.type == pygame.VIDEORESIZE:
-            #     self.display_window = pygame.display.set_mode((event.w, event.h),
-            #                                                   pygame.DOUBLEBUF | pygame.RESIZABLE)
+            # TODO: fix video resizing then add the RESIZEABLE flag back into the full/windowed toggler
+            # if event.type == pygame.VIDEORESIZE and not self.game_vars[FULL_SCREEN]:
+            #     self.display_window = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
             #     self.window_height = event.h
             #     self.window_width = event.w
-            #     self.GUI.handle_event(event)
-            #
             #     self.GUI.handle_event(event)
 
             if event.type == pygame.MOUSEBUTTONUP:
@@ -125,6 +125,9 @@ class GameEngine:
                     self.Renderer.handle_event(event)
                 else:
                     self.GUI.handle_event(event)
+                if event.key in [pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6, pygame.K_7]:
+                    if self.game_vars[GAME_STATE] == IN_FIGHT:
+                        make_event(FIGHT_EVENT, subtype=ACTION, num=int(pygame.key.name(event.key))-1)
 
             if event.type == pygame.KEYUP:
                 self.GUI.handle_event(event)
@@ -139,8 +142,6 @@ class GameEngine:
                     self.GUI.handle_event(event)
                 if event.subtype == FIGHT_END:
                     self.GUI.handle_event(event)
-                if event.subtype == ACTION:
-                    self.GameSound.handle_event(event)
                 self.Logic.handle_event(event)
 
             if event.type == PRINT_LINE:
@@ -157,9 +158,10 @@ class GameEngine:
                 self.game_vars[FULL_SCREEN] = not self.game_vars[FULL_SCREEN]
 
                 if self.game_vars[FULL_SCREEN]:
+                    self.window_width, self.window_height = pygame.display.list_modes()[0]
                     self.display_window = pygame.display.set_mode((self.window_width, self.window_height), pygame.FULLSCREEN)
                 else:
-                    self.display_window = pygame.display.set_mode((self.window_width, self.window_height), pygame.RESIZABLE)
+                    self.display_window = pygame.display.set_mode((self.window_width, self.window_height))
 
                 self.Renderer.handle_event(event)
 
@@ -191,10 +193,8 @@ class GameEngine:
                         input_pos = ast.literal_eval(parsed_input[2])
                     except SyntaxError:
                         input_pos = ast.literal_eval(parsed_input[2]+parsed_input[3])
-                    make_event(pygame.MOUSEMOTION, pos=input_pos, rel=(0, 0), buttons=[])
                     make_event(pygame.MOUSEBUTTONUP, pos=input_pos, button=1)
-                else:
-                    make_event(pygame.MOUSEBUTTONUP, pos=(2, 2), button=1)
+                    make_event(PRINT_LINE, message="Event placed.", color=Color.DarkOrange)
             else:
                 error_message = "Event not recognized '" + parsed_input[1] + "'"
                 make_event(PRINT_LINE, message=error_message, color=(255, 255, 0))

@@ -118,7 +118,7 @@ class hot(Effect):
     def update(self):
         if self.timer % self.tickinterval == 0:
             print(self.name + " healed for " + str(self.healpertick))
-            self.possessor.dohealing(self.healpertick)
+            self.possessor.heal(self.healpertick)
         if self.timer < self.duration or self.duration == -1:
             self.timer += 1
         else:
@@ -178,13 +178,15 @@ class block(ability):
 
 class melee_attack(ability):
 
-    def __init__(self, name, possessor, actions, flags=(), k_message=None, uses=1):
+    def __init__(self, name, possessor, actions, flags=(), k_message=None, uses=1, sound=None):
         super().__init__(name, possessor, actions, flags, uses)
         self.type = "melee"
         if k_message:
             self.kill_message = k_message
         else:
             self.kill_message = "{0} slashes {1} to death!"
+
+        self.sound = sound
 
     def afflict(self, target):
         for action in self.actions:

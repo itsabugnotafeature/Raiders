@@ -8,7 +8,7 @@ pygame.display.set_caption("Raiders")
 pygame.scrap.init()
 pygame.scrap.set_mode(pygame.SCRAP_CLIPBOARD)
 
-Engine = GameEngine.GameEngine(main_window, GameLogic.Logic(), GameGUI.GUI(), GameRenderer.Renderer())
+Engine = GameEngine.GameEngine(main_window)
 
 
 while True:
