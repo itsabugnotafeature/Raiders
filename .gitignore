@@ -1,5 +1,6 @@
 # Developer files
 INFO.txt
+sloc.py
 
 # Pycharm Xml files
 *.xml
