@@ -7,9 +7,18 @@ class SpriteAnimator:
 
         self.sprite = sprite
 
-    def use(self, ability, animator):
+    def use(self, ability, outcome, animator):
+
+        # TODO: give each ability an AnimationPack, but also give every sprite a default s/f/p AnimationPack
         try:
-            animator.set_animation(self.sprite, ability.animation)
+            if outcome["blocked"]:
+                print("ANIMATION: Attempted to play blocked animation for {}.".format(self.sprite))
+                animator.set_animation(self.sprite, ability.blocked_animation)
+            elif outcome["blocking"]:
+                print("ANIMATION: Attempted to play blocking animation for {}.".format(self.sprite))
+                animator.set_animation(self.sprite, ability.blocking_animation)
+            else:
+                animator.set_animation(self.sprite, ability.animation)
         except AttributeError:
             print("ANIMATION: Failed to find animation for {}'s [{}] ability.".format(self.sprite.name, ability.name))
             print("ANIMATION: Reverting to default animation,")

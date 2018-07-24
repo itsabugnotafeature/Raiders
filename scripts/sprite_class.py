@@ -1,7 +1,6 @@
-from scripts.ability import *
+from scripts.abilities import *
 from scripts import sprite_ai
 from scripts import sprite_threat
-from scripts import animations
 from scripts.Colors import Color
 from scripts import tools
 from scripts import sprite_animator
@@ -23,9 +22,7 @@ class Sprite:
         self.weakness = 0
         self.effects = []
         self.fightable = True
-        self.abilities = [melee_attack("Light", self, (basic_damage("", 1),), ("light",)),
-                          melee_attack("Light", self, (basic_damage("", 1),), ("light",)),
-                          melee_attack("Light", self, (basic_damage("", 1),), ("light",))]
+        self.abilities = [dmg_light_02, dmg_light_02, dmg_light_02]
 
         # DRAWING ITSELF
         img = pygame.image.load("graphics//Sprites//" + picloc)
@@ -69,12 +66,11 @@ class Sprite:
         # TODO: support for blocking abilities, if the ability is blocked do the blocked logic in the ability
         if outcome["death_blocked"]:
             make_event(PRINT_LINE, message="{} can't attack while dead.".format(self.name), color=Color.DarkRed)
-        elif outcome["blocked"]:
-            pass
         else:
-            active_ability.afflict(target)
-            self.SpriteAnimator.use(active_ability, engine.Animator)
-            self.SFXPlayer.use(active_ability, engine.Audio)
+            active_ability.afflict(self, target, outcome, engine)
+            # TODO: add sprite blocking and blocked animations
+            self.SpriteAnimator.use(active_ability, outcome, engine.Animator)
+            self.SFXPlayer.use(active_ability, outcome, engine.Audio)
 
     def health_update(self):
         if self.health <= 0:
@@ -91,6 +87,7 @@ class Sprite:
 
     def damage(self, source, value):
         self.health -= value
+        return value
 
     def heal(self, value):
         self.health += value
@@ -115,19 +112,9 @@ class Player(Sprite):
         super().__init__(name, pclass, picloc, pos)
         self.type = "player"
         if pclass.lower() == "warrior":
-            self.abilities = ["light", "light", "heavy", "sweep", "block", "parry", "counter"]
+            pass
         if pclass.lower() == "tank":
-            self.abilities = [melee_attack("Execute", self, (basic_damage("", 5),), ("heavy",), uses=3),
-                              melee_attack("Sound Test", self, (op_damage(""),), ("magic",),
-                                           "{1} is killed by the architects!",
-                                           sound=pygame.mixer.Sound("sounds/fight/eerie_magic.wav")),
-                              melee_attack("Light", self, (basic_damage("", 1),), ("light",), uses=3),
-                              melee_attack("Execute", self, (basic_damage("", 5),), ("heavy",), uses=3),
-                              melee_attack("OP BS", self, (op_damage(""),), ("magic",),
-                                           "{1} is killed by the architects!"),
-                              melee_attack("Light", self, (basic_damage("", 1),), ("light",)),
-                              melee_attack("Light", self, (basic_damage("", 1),), ("light",))
-                              ]
+            self.abilities = [blk_light_01, dmg_light_01, dmg_op_01, dmg_execute_01, dmg_light_02, blk_basic_01]
 
     def choose_ability(self, pos):
         choice = int(input("Choose an ability to use (1-{}): ".format(str(len(self.abilities)))))
@@ -148,19 +135,16 @@ class Monster(Sprite):
             self.no_threat_abilities = abilities[3:6]
         else:
 
-            self.threat_abilities = [melee_attack("Execute", self, (basic_damage("", 5),), ("heavy",), uses=3),
-                                     melee_attack("Execute", self, (basic_damage("", 5),), ("heavy",), uses=3),
-                                     melee_attack("Execute", self, (basic_damage("", 5),), ("heavy",), uses=3)]
-            self.no_threat_abilities = [melee_attack("Light", self, (basic_damage("", 1),), ("light",)),
-                                        melee_attack("Light", self, (basic_damage("", 1),), ("light",)),
-                                        melee_attack("Light", self, (basic_damage("", 1),), ("light",))]
+            self.threat_abilities = [dmg_execute_01, dmg_execute_01, blk_basic_01]
+            self.no_threat_abilities = [dmg_light_02, dmg_light_02, dmg_light_02]
 
         self.AI = sprite_ai.BaseMonsterAI(self)
         self.ThreatManager = sprite_threat.ThreatManager(self)
 
     def damage(self, source, value):
-        super().damage(source, value)
+        damage_done = super().damage(source, value)
         self.target = self.ThreatManager.do_threat_update(source, value)
+        return damage_done
 
     def get_target(self):
         return self.target

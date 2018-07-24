@@ -404,7 +404,7 @@ class Button:
 
         self.play_sound = False
         # TODO: optimize this, they obviously don't need to load the sound individually
-        self.sound = pygame.mixer.Sound("sounds/gui/gui_passover.wav")
+        self.sound = pygame.mixer.Sound("sounds/gui/gui_passover_01.wav")
         self.sound.set_volume(.4)
 
         self.blit_image = self.base_image.copy()

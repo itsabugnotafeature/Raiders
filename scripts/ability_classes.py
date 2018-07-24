@@ -1,21 +1,22 @@
 from scripts.variables.events import *
+from scripts.ability_sounds import *
 
 """
 
-ability.py class
+ability_classes.py class
 
 constructor function for abilities
 
 supported types:
 light
 heavy
-block/negations
+block
 shields
 dots
 hots
-knockback
+knockbacks
 aoe
-effectplacing
+tile_effects
 spawning
 
 flags:
@@ -127,17 +128,32 @@ class hot(Effect):
 
 # MAIN CLASS FOR ABILITIES
 
-class ability():
+class Ability:
 
-    def __init__(self, name, possessor, actions, flags=(), uses=1):
+    def __init__(self, name, actions, flags=None, uses=1, k_message=None, s_sound=None, f_sound=None):
         self.name = name
-        self.flags = flags
-        self.possessor = possessor
-        self.actions = actions
+
+        if actions is None:
+            self.actions = []
+        else:
+            self.actions = actions
+
+        if flags is None:
+            self.flags = []
+        else:
+            self.flags = flags
+
         self.type = None
         self.uses = uses
-        for action in self.actions:
-            action.setup(self)
+
+        if k_message:
+            self.kill_message = k_message
+        else:
+            self.kill_message = "{0} kills {1}!"
+
+        self.s_sound = s_sound
+        self.f_sound = f_sound
+        self.p_sound = None
 
     def __str__(self):
         return self.name
@@ -145,8 +161,34 @@ class ability():
     def __repr__(self):
         return self.name
 
-    def afflict(self, target):
-        make_event(PRINT_LINE, message="This attack subclass has no afflict method!")
+    def afflict(self, attacker, target, outcome, engine):
+        damage_dict = {}
+        if not outcome["blocked"]:
+            for action in self.actions:
+                self.process_damage_dict(action.afflict(attacker, target, engine), damage_dict)
+            for target, damage in damage_dict.items():
+                if target.health > 0:
+                    make_event(PRINT_LINE, message="{}'s [{}] did {} damage to {}.".format(attacker, self.name, damage, target))
+                    make_event(PRINT_LINE, message="{} has {} health left.".format(target, target.health))
+                else:
+                    make_event(PRINT_LINE, message=self.kill_message.format(attacker, target))
+        else:
+            self.do_blocked_afflict(attacker, target, engine)
+
+    @staticmethod
+    def process_damage_dict(new_damage_dict, damage_dict):
+        # Takes an incoming dict and "adds" it, so that the damage_dict holds the total damage done to each sprite
+        for sprite, value in new_damage_dict.items():
+            if damage_dict.get(sprite):
+                damage_dict[sprite] += value
+            else:
+                damage_dict[sprite] = value
+
+    def do_blocked_afflict(self, attacker, target, engine):
+        # This can be overriden in subclasses to adjust the behavior of a blocked ability (i.e. if this attack is
+        # blocked - then do these actions)
+        # However it should NOT print blocked messages, that belongs to the ability responsible for the block
+        pass
 
     def get_type(self):
         return self.type
@@ -156,46 +198,42 @@ class ability():
 
 # BLOCKS
 
-class block(ability):
+class Block(Ability):
 
-    def __init__(self, name, possessor, actions, flags=()):
-        super().__init__(name, possessor, actions, flags)
+    def __init__(self, name, flags=None, uses=1, s_sound=None, f_sound=None, actions=None):
+        super().__init__(name, actions, flags, uses, s_sound, f_sound)
         self.type = "block"
 
-    def blocks(self, ability):
-        for flag in ability.flags:
-            if flag in self.flags:
-                print(
-                    self.possessor.name + "'s [" + self.name + "] blocked " + ability.possessor.name + "'s [" + ability.name + "]")
-                return True
+    def afflict(self, attacker, target, outcome, engine):
+        super().afflict(attacker, target, outcome, engine)
+        if outcome["blocking"]:
+            make_event(PRINT_LINE, message="{} blocked {}'s [{}] ability with [{}]."
+                       .format(attacker, target, outcome["opposite_ability"], self))
+        else:
+            make_event(PRINT_LINE, message="{}'s [{}] ability was ineffectual.".format(attacker, self))
+
+    def can_block(self, ability):
+        if "unblockable" in ability.flags:
             return False
 
-    def afflict(self, target):
-        pass
+        for flag in ability.flags:
+            if flag in self.flags:
+                return True
+            return False
 
 
 # MELEE ATTACKS
 
-class melee_attack(ability):
+class MeleeAttack(Ability):
 
-    def __init__(self, name, possessor, actions, flags=(), k_message=None, uses=1, sound=None):
-        super().__init__(name, possessor, actions, flags, uses)
+    def __init__(self, name, actions, flags=None, uses=1, k_message=None, sound=None):
+        super().__init__(name, actions, flags, uses, k_message, sound)
         self.type = "melee"
-        if k_message:
-            self.kill_message = k_message
-        else:
-            self.kill_message = "{0} slashes {1} to death!"
 
-        self.sound = sound
-
-    def afflict(self, target, blocked=False):
-        for action in self.actions:
-            action.afflict(target)
-        if target.health > 0:
-            make_event(PRINT_LINE, message=target.name + " has " + str(target.health) + " health left.")
+    # TODO: add logic for if it can reach or not, similar to Block's can_block method
 
 
-class conditional_melee_attack(ability):
+class conditional_melee_attack(Ability):
 
     def __init__(self, name, possessor, condition, actions=(), flags=()):
         super().__init__(name, possessor, actions, flags)
@@ -215,7 +253,7 @@ class conditional_melee_attack(ability):
 
 # SPELL/RANGED ATTACKS [Unfinished]
 
-class spell_attack(ability):
+class spell_attack(Ability):
 
     def __init__(self, name, damage=1, casttime=0, abilities=(), flags=()):
         super().__init__(name, flags)
@@ -232,46 +270,42 @@ class spell_attack(ability):
 
 # ACTIONS
 
-class action():
+class Action:
 
-    def __init__(self, name):
-        self.name = name
-        self.possessor = None
-        self.playername = None
+    def __init__(self):
+        pass
 
-    def setup(self, possessor):
-        self.possessor = possessor
-        self.playername = possessor.possessor.name
-        if self.name == "":
-            self.name = self.possessor.name
-        if self.name[0] == "+":
-            self.name = str(self.possessor.name + self.name[1:])
+    def afflict(self, attacker, target, engine):
+        # Returns a dict with the damage done to each sprite
+        # Damages the target(s)
+        pass
 
 
-class basic_damage(action):
+class BasicDamage(Action):
 
-    def __init__(self, name, damage):
-        super().__init__(name)
+    def __init__(self, damage):
+        super().__init__()
         self.damage = damage
 
-    def afflict(self, target):
-        make_event(PRINT_LINE, message=self.playername + "'s [" + self.name + "] did " + str(self.damage) + " damage to " + target.name + ".")
-        target.damage(self.possessor.possessor, self.damage)
+    def afflict(self, attacker, target, engine):
+        # Damages a single mob
+        total_damage = target.damage(attacker, self.damage)
         target.health_update()
+        return {target: total_damage}
 
 
-class op_damage(action):
+class OPDamage(Action):
 
-    def __init__(self, name):
-        super().__init__(name)
+    def __init__(self):
+        super().__init__()
 
-    def afflict(self, target):
-        make_event(PRINT_LINE, message=self.playername + "'s [" + self.name + "] magically evaporated " + target.name + ".")
-        target.damage(self.possessor.possessor, target.health + 1)
+    def afflict(self, attacker, target, engine):
+        total_damage = target.damage(attacker, target.health + 1)
         target.health_update()
+        return {target: total_damage}
 
 
-class basicAoE(action):
+class basicAoE(Action):
 
     def __init__(self, name, damage, grid, pos):
         super().__init__()
@@ -282,7 +316,7 @@ class basicAoE(action):
         pass
 
 
-class buff(action):
+class buff(Action):
 
     def __init__(self, name, effect=hot("Dummy Spell", 1, 2, 0)):
         super().__init__()
@@ -292,7 +326,7 @@ class buff(action):
         self.effect.apply(target)
 
 
-class debuff(action):
+class debuff(Action):
 
     def __init__(self, name, effect=dot("Dummy Spell", -1, 2, 0)):
         self.effect = effect
@@ -301,7 +335,7 @@ class debuff(action):
         self.effect.apply(target)
 
 
-class empty_attack(action):
+class empty_attack(Action):
 
     def __init__(self):
         super().__init__("empty")

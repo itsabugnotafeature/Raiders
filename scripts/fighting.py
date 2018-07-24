@@ -36,6 +36,8 @@ class FightManager:
             player_attack = self.player.get_attack(self.monster, event.num)
             monster_attack = self.monster.get_attack(self.player, self.turn_counter)
 
+            print("FIGHT: {} used [{}], {} used [{}]".format(self.player, player_attack, self.monster, monster_attack))
+
             player_outcome, monster_outcome = self.AbilityAnalyzer.get_outcome(self.player, player_attack,
                                                                                self.monster, monster_attack)
 
@@ -70,12 +72,36 @@ class AbilityAnalyzer:
         pass
 
     def get_outcome(self, player, player_ability, monster, monster_ability):
-        player_outcome = {"block": False, "counter": False, "death_blocked": False}
+        """
+        Generates a dict of possible results that the various scripts involved in the attacking process can use to
+        decide what animations/sounds/attacks to do
+        "blocked" signifies that the respective attack was blocked
+        "blocking" signifies that the respective block successfully blocked an attack
+        """
+
+        player_outcome = {"blocked": False, "blocking": False, "counter": False, "death_blocked": False,
+                          "opposite_ability": monster_ability}
+        monster_outcome = {"blocked": False, "blocking": False, "counter": False, "death_blocked": False,
+                           "opposite_ability": player_ability}
+
         if not player.fightable:
             player_outcome["death_blocked"] = True
+        if monster_ability.type == "block":
+            is_player_blocked = self.resolve_block(player_ability, monster_ability)
+            player_outcome["blocked"] = is_player_blocked
+            monster_outcome["blocking"] = is_player_blocked
 
-        monster_outcome = {"block": False, "counter": False, "death_blocked": False}
         if not monster.fightable:
             monster_outcome["death_blocked"] = True
+        if player_ability.type == "block":
+            is_monster_blocked = self.resolve_block(monster_ability, player_ability)
+            monster_outcome["blocked"] = is_monster_blocked
+            player_outcome["blocking"] = is_monster_blocked
 
         return player_outcome, monster_outcome
+
+    @staticmethod
+    def resolve_block(base_ability, blocking_ability):
+        if base_ability.type == blocking_ability.type:
+            return False
+        return blocking_ability.can_block(base_ability)
