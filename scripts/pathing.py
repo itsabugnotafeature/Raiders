@@ -72,7 +72,7 @@ class PathManager:
                 else:
                     self.path_index_dict[monster] += 1
         except KeyError:
-            print("Error in PathManager: {} not found".format(str(monster)))
+            print("Error in PathManager: {} not found".format(monster))
             return False
         return self.master_path_dict[monster][self.path_index_dict[monster]]
 

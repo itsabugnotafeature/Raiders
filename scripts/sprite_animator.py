@@ -20,6 +20,6 @@ class SpriteAnimator:
             else:
                 animator.set_animation(self.sprite, ability.animation)
         except AttributeError:
-            print("ANIMATION: Failed to find animation for {}'s [{}] ability.".format(self.sprite.name, ability.name))
+            print("ANIMATION: Failed to find animation for {}'s {} ability.".format(self.sprite.name, ability))
             print("ANIMATION: Reverting to default animation,")
             animator.set_animation(self.sprite, animations.attack())

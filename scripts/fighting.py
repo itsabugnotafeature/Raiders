@@ -36,7 +36,7 @@ class FightManager:
             player_attack = self.player.get_attack(self.monster, event.num)
             monster_attack = self.monster.get_attack(self.player, self.turn_counter)
 
-            print("FIGHT: {} used [{}], {} used [{}]".format(self.player, player_attack, self.monster, monster_attack))
+            print("FIGHT: {} used {}, {} used {}".format(self.player, player_attack, self.monster, monster_attack))
 
             player_outcome, monster_outcome = self.AbilityAnalyzer.get_outcome(self.player, player_attack,
                                                                                self.monster, monster_attack)

@@ -88,6 +88,6 @@ class BaseMonsterAI(BaseAI):
 
             # TODO: let it use abilities with multiple uses
             active_ability = self.sprite.no_threat_abilities[0]
-            print("Error using {}'s [{}] ability, reverting to number 1.".format(self.sprite.name, active_ability.name))
+            print("Error using {}'s [{}] ability, reverting to number 1.".format(self.sprite, active_ability))
 
         return active_ability

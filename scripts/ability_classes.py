@@ -130,7 +130,7 @@ class hot(Effect):
 
 class Ability:
 
-    def __init__(self, name, actions, flags=None, uses=1, k_message=None, s_sound=None, f_sound=None):
+    def __init__(self, name, actions, flags=None, uses=1, k_message=None, sound_pack=snd_empty_pack):
         self.name = name
 
         if actions is None:
@@ -151,15 +151,15 @@ class Ability:
         else:
             self.kill_message = "{0} kills {1}!"
 
-        self.s_sound = s_sound
-        self.f_sound = f_sound
-        self.p_sound = None
+        self.s_sound = sound_pack.success_sound
+        self.f_sound = sound_pack.failure_sound
+        self.p_sound = sound_pack.partial_sound
 
     def __str__(self):
-        return self.name
+        return "[{}]".format(self.name)
 
     def __repr__(self):
-        return self.name
+        return "[{}]".format(self.name)
 
     def afflict(self, attacker, target, outcome, engine):
         damage_dict = {}
@@ -200,8 +200,8 @@ class Ability:
 
 class Block(Ability):
 
-    def __init__(self, name, flags=None, uses=1, s_sound=None, f_sound=None, actions=None):
-        super().__init__(name, actions, flags, uses, s_sound, f_sound)
+    def __init__(self, name, flags=None, uses=1, sound_pack=snd_empty_pack, actions=None):
+        super().__init__(name, actions, flags, uses, sound_pack=sound_pack)
         self.type = "block"
 
     def afflict(self, attacker, target, outcome, engine):
@@ -226,8 +226,8 @@ class Block(Ability):
 
 class MeleeAttack(Ability):
 
-    def __init__(self, name, actions, flags=None, uses=1, k_message=None, sound=None):
-        super().__init__(name, actions, flags, uses, k_message, sound)
+    def __init__(self, name, actions, flags=None, uses=1, k_message=None, sound_pack=snd_empty_pack):
+        super().__init__(name, actions, flags, uses, k_message, sound_pack)
         self.type = "melee"
 
     # TODO: add logic for if it can reach or not, similar to Block's can_block method

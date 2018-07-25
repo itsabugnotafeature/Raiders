@@ -102,7 +102,7 @@ class Sprite:
             active_ability = self.abilities[ability_num]
         except IndexError:
             active_ability = self.abilities[0]
-            print("Error using {}'s [{}] ability, reverting to number 1.".format(self.name, active_ability.name))
+            print("Error using {}'s {} ability, reverting to number 1.".format(self.name, active_ability))
         return active_ability
 
 

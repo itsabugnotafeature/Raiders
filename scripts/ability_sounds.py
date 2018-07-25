@@ -8,10 +8,6 @@ Holds all of the sounds that abilities can play
 
 pygame.mixer.init()
 
-snd_basic_sword = Sound("sounds/fight/sword_clash.wav")
-snd_eerie_magic = Sound("sounds/fight/eerie_magic.wav")
-snd_block = Sound("sounds/fight/shield_block.wav")
-
 
 class SoundPack:
 
@@ -22,3 +18,16 @@ class SoundPack:
         self.success_sound = s_sound
         self.failure_sound = f_sound
         self.partial_sound = p_sound
+
+
+basic_sword = Sound("sounds/fight/sword_clash.wav")
+eerie_magic = Sound("sounds/fight/eerie_magic.wav")
+block = Sound("sounds/fight/shield_block.wav")
+
+
+snd_basic_atk = SoundPack(basic_sword, None, None)
+snd_basic_mag = SoundPack(eerie_magic, None, None)
+snd_basic_blk = SoundPack(block, None, None)
+snd_empty_pack = SoundPack(None, None, None)
+
+
