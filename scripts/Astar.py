@@ -108,5 +108,5 @@ def a_star(start, goal, grid):
         if current[1] == goal:
             return best_path
 
-    if not current[1] == goal:
-        return best_path
+    # if not current[1] == goal:
+    return best_path

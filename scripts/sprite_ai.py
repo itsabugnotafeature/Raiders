@@ -2,6 +2,7 @@ from scripts.Astar import a_star
 from scripts import sprite_class
 import random
 from scripts import animations
+from scripts.abilities import empty_atk
 
 """
 The AI classes provide a collection of helpful decision makers for sprites.
@@ -24,7 +25,7 @@ class BaseAI:
     def do_move(self, grid, path_manager):
         pass
 
-    def get_attack(self, target, ability_pos):
+    def get_attack(self, target, turn_num, grid):
         pass
 
 
@@ -74,7 +75,7 @@ class BaseMonsterAI(BaseAI):
             return True
 
     # Ability_pos should always be the turn number
-    def get_attack(self, target, turn_num):
+    def get_attack(self, target, turn_num, grid):
         # TODO: consider making a SpriteAnimator class that the AI can delegate animation tasks to
         # Turn numbers start at 1 and go to 3 so we subtract to avoid IndexError
         turn_num -= 1
@@ -89,5 +90,8 @@ class BaseMonsterAI(BaseAI):
             # TODO: let it use abilities with multiple uses
             active_ability = self.sprite.no_threat_abilities[0]
             print("Error using {}'s [{}] ability, reverting to number 1.".format(self.sprite, active_ability))
+
+        if not active_ability.is_in_range(self.sprite, target, grid):
+            active_ability = empty_atk
 
         return active_ability

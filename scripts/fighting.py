@@ -33,8 +33,8 @@ class FightManager:
 
         if event.subtype == ACTION:
 
-            player_attack = self.player.get_attack(self.monster, event.num)
-            monster_attack = self.monster.get_attack(self.player, self.turn_counter)
+            player_attack = self.player.get_attack(self.monster, event.num, self.GameLogic.grid)
+            monster_attack = self.monster.get_attack(self.player, self.turn_counter, self.GameLogic.grid)
 
             print("FIGHT: {} used {}, {} used {}".format(self.player, player_attack, self.monster, monster_attack))
 
@@ -54,7 +54,7 @@ class FightManager:
 
             self.turn_counter += 1
 
-            if self.turn_counter > 3:
+            if not self.can_continue(self.player, self.monster, self.Engine.Logic.grid):
                 make_event(FIGHT_EVENT, subtype=FIGHT_END)
 
         if event.subtype == FIGHT_END:
@@ -64,6 +64,14 @@ class FightManager:
             self.player = None
             self.attacker = None
             self.defender = None
+
+    def can_continue(self, player, monster, grid):
+        if self.turn_counter > 3:
+            return False
+        if not self.player.can_make_attack(monster, grid) and not monster.can_make_attack(player, grid):
+            print("FIGHT: Exiting early because {} and {} have no more available abilities.".format(self.player, self.monster))
+            return False
+        return True
 
 
 class AbilityAnalyzer:
@@ -80,9 +88,9 @@ class AbilityAnalyzer:
         """
 
         player_outcome = {"blocked": False, "blocking": False, "counter": False, "death_blocked": False,
-                          "opposite_ability": monster_ability}
+                          "opposite_ability": monster_ability, "out_of_range": False}
         monster_outcome = {"blocked": False, "blocking": False, "counter": False, "death_blocked": False,
-                           "opposite_ability": player_ability}
+                           "opposite_ability": player_ability, "out_of_range": False}
 
         if not player.fightable:
             player_outcome["death_blocked"] = True

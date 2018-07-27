@@ -72,6 +72,12 @@ class Sprite:
             self.SpriteAnimator.use(active_ability, outcome, engine.Animator)
             self.SFXPlayer.use(active_ability, outcome, engine.Audio)
 
+    def can_make_attack(self, target, grid):
+        for ability in self.abilities:
+            if ability.is_in_range(self, target, grid):
+                return True
+        return False
+
     def health_update(self):
         if self.health <= 0:
             self.health = 0
@@ -95,16 +101,6 @@ class Sprite:
     def face(self, pos):
         self.facing = tools.get_facing(self.pos, pos, self.facing)
 
-    # When using get_attack on any non Monster Sprite ability_num should be the index of the desired ability in that
-    # sprites abilities list
-    def get_attack(self, target, ability_num):
-        try:
-            active_ability = self.abilities[ability_num]
-        except IndexError:
-            active_ability = self.abilities[0]
-            print("Error using {}'s {} ability, reverting to number 1.".format(self.name, active_ability))
-        return active_ability
-
 
 class Player(Sprite):
 
@@ -119,6 +115,16 @@ class Player(Sprite):
     def choose_ability(self, pos):
         choice = int(input("Choose an ability to use (1-{}): ".format(str(len(self.abilities)))))
         return choice - 1
+
+    # When using get_attack on any non Monster Sprite ability_num should be the index of the desired ability in that
+    # sprites abilities list
+    def get_attack(self, target, ability_num, grid):
+        try:
+            active_ability = self.abilities[ability_num]
+        except IndexError:
+            active_ability = self.abilities[0]
+            print("Error using {}'s {} ability, reverting to number 1.".format(self.name, active_ability))
+        return active_ability
 
 
 class Monster(Sprite):
@@ -156,5 +162,16 @@ class Monster(Sprite):
         return self.AI.do_move(grid, path_manager)
 
     # When using get_attack on an instance of Monster the first parameter should always be the turn number of the fight
-    def get_attack(self, target, turn_num):
-        return self.AI.get_attack(target, turn_num)
+    def get_attack(self, target, turn_num, grid):
+        return self.AI.get_attack(target, turn_num, grid)
+
+    def can_make_attack(self, target, grid):
+        if target == self.get_target():
+            for ability in self.threat_abilities:
+                if ability.is_in_range(self, target, grid):
+                    return True
+        else:
+            for ability in self.no_threat_abilities:
+                if ability.is_in_range(self, target, grid):
+                    return True
+        return False

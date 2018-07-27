@@ -1,5 +1,6 @@
 from scripts.variables.events import *
 from scripts.ability_sounds import *
+from scripts import Astar
 
 """
 
@@ -130,7 +131,7 @@ class hot(Effect):
 
 class Ability:
 
-    def __init__(self, name, actions, flags=None, uses=1, k_message=None, sound_pack=snd_empty_pack):
+    def __init__(self, name, actions, flags=None, uses=1, k_message=None, sound_pack=snd_empty_pack, range=1):
         self.name = name
 
         if actions is None:
@@ -154,6 +155,8 @@ class Ability:
         self.s_sound = sound_pack.success_sound
         self.f_sound = sound_pack.failure_sound
         self.p_sound = sound_pack.partial_sound
+
+        self.range = range
 
     def __str__(self):
         return "[{}]".format(self.name)
@@ -193,15 +196,33 @@ class Ability:
     def get_type(self):
         return self.type
 
+    def is_in_range(self, attacker, target, grid):
+        # Allows abilities to tell you if the can be used on the target or not
+        if len(Astar.a_star(attacker.pos, target.pos, grid)) <= self.range or self.range == -1:
+            return True
+        return False
+
 
 # ABILITIES
 
+# PLACEHOLDER
+
+class EmptyAttack(Ability):
+
+    def __init__(self):
+        super().__init__("EmptyAttack", None, range=-1)
+        self.type = "empty_attack"
+
+    def afflict(self, attacker, target, outcome, engine):
+        make_event(PRINT_LINE, message="{} is out of range.".format(attacker))
+
 # BLOCKS
+
 
 class Block(Ability):
 
     def __init__(self, name, flags=None, uses=1, sound_pack=snd_empty_pack, actions=None):
-        super().__init__(name, actions, flags, uses, sound_pack=sound_pack)
+        super().__init__(name, actions, flags, uses, sound_pack=sound_pack, range=-1)
         self.type = "block"
 
     def afflict(self, attacker, target, outcome, engine):
@@ -226,8 +247,8 @@ class Block(Ability):
 
 class MeleeAttack(Ability):
 
-    def __init__(self, name, actions, flags=None, uses=1, k_message=None, sound_pack=snd_empty_pack):
-        super().__init__(name, actions, flags, uses, k_message, sound_pack)
+    def __init__(self, name, actions, flags=None, uses=1, k_message=None, sound_pack=snd_empty_pack, range=1):
+        super().__init__(name, actions, flags, uses, k_message, sound_pack, range)
         self.type = "melee"
 
     # TODO: add logic for if it can reach or not, similar to Block's can_block method
