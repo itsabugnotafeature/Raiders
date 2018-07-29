@@ -97,13 +97,14 @@ class GUI(BaseSystem):
         self.set_engine(engine)
         self.set_up()
 
-    def display_fight_gui(self, player, target, grid):
+    def display_fight_gui(self, player, target):
+        grid = self.Engine.Logic.grid
         for i in range(len(player.abilities)):
             ability = player.abilities[i]
             button_x = 580 + i % 4 * 135
             button_y = 740 + (int(i / 4)) * 110
             button = scripts.gui_elements.AbilityButton((button_x, button_y), i, ability, self.GUITheme)
-            if not ability.is_in_range(player, target, grid):
+            if not player.is_ability_usable(ability, target, grid):
                 button.state = DISABLED
 
             self.gui_list.append(button)
@@ -119,7 +120,10 @@ class GUI(BaseSystem):
     def handle_event(self, event):
         if event.type == FIGHT_EVENT:
             if event.subtype == FIGHT_BEGIN:
-                self.display_fight_gui(event.player, event.monster, self.Engine.Logic.grid)
+                self.display_fight_gui(event.player, event.monster)
+            if event.subtype == ACTION:
+                self.fight_clean_up()
+                self.display_fight_gui(event.player, event.monster)
             elif event.subtype == FIGHT_END:
                 self.fight_clean_up()
 

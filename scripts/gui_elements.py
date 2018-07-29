@@ -402,7 +402,11 @@ class Button:
 
         self.state = BASE_STATE
 
+        # Signal that they are about to play
         self.play_sound = False
+        # Signal that a sound is actually playing
+        self.playing_sound = False
+        self.channel_id = None
 
         # TODO: optimize this, they obviously don't need to load the sound individually
         self.sound = pygame.mixer.Sound("sounds/gui/gui_passover_01.wav")
@@ -459,7 +463,19 @@ class Button:
     def update(self, engine):
         if self.play_sound:
             self.play_sound = False
-            engine.Audio.play(self.sound)
+            self.channel_id, queued = engine.Audio.play(self.sound)
+            if not queued:
+                self.playing_sound = True
+        if self.playing_sound:
+            # Handles all ways that the playing_sound state can be exited
+
+            if engine.Audio.get_sound(self.channel_id) != self.sound:
+                self.playing_sound = False
+
+            if not self.state == HOVERED:
+                # Stops audio playback if the mouse move of the button
+                engine.Audio.stop(self.channel_id, self.sound)
+                self.playing_sound = False
 
     def use_action(self):
         if self.action is not None:
@@ -484,7 +500,7 @@ class AbilityButton(Button):
         try:
             ability_image = ability.image
         except AttributeError:
-            print("GUI_ELEMENTS: No image found for [{}] ability.".format(ability))
+            print("GUI_ELEMENTS: No image found for {} ability.".format(ability))
             print("GUI_ELEMENTS: Reverting to default image.")
             # TODO: fix the error handling here
             ability_image = None
