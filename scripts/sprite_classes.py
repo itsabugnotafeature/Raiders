@@ -5,6 +5,7 @@ from scripts.Colors import Color
 from scripts import tools
 from scripts import sprite_animator
 from scripts import sprite_sfx
+from scripts import sprite_ability_manager
 
 # TODO: generate getter/setter methods for all traits so that abilities can edit/reset them
 
@@ -49,6 +50,9 @@ class Sprite:
         # SOUND
         self.SFXPlayer = sprite_sfx.SFXPlayer(self)
 
+        # FIGHT LOGIC
+        self.AbilityManager = sprite_ability_manager.AbilityManager(self)
+
     def render_name(self, font, theme):
         self.name_img = font.render(self.name, False, theme.accent3)
 
@@ -71,12 +75,28 @@ class Sprite:
             # TODO: add sprite blocking and blocked animations
             self.SpriteAnimator.use(active_ability, outcome, engine.Animator)
             self.SFXPlayer.use(active_ability, outcome, engine.Audio)
+            self.AbilityManager.use(active_ability)
 
     def can_make_attack(self, target, grid):
-        for ability in self.abilities:
-            if ability.is_in_range(self, target, grid):
-                return True
-        return False
+        # Checks to see if the sprite can use any of its abilities
+        # Used once per turn
+        return self.AbilityManager.can_make_attack(target, grid)
+
+    def prepare_for_fight(self):
+        # Provides access to AbilityManger.start_fight and any other systems that want to be notified
+        self.AbilityManager.start_fight()
+
+    def prepare_for_turn(self):
+        # Provides access to AbilityManger.start_turn and any other systems that want to be notified
+        self.AbilityManager.start_turn()
+
+    def get_ability_uses(self, ability):
+        # Exposes the AbilityManager.get_ability_uses method
+        return self.AbilityManager.get_ability_uses(ability)
+
+    def is_ability_usable(self, ability, target, grid):
+        # Exposes the AbilityManager.is_ability_usable method
+        return self.AbilityManager.is_ability_usable(ability, target, grid)
 
     def health_update(self):
         if self.health <= 0:
@@ -108,7 +128,7 @@ class Player(Sprite):
         super().__init__(name, pclass, picloc, pos)
         self.type = "player"
         if pclass.lower() == "warrior":
-            pass
+            self.abilities = [blk_light_01, dmg_light_01, dmg_op_01, dmg_execute_01, dmg_light_02, blk_basic_01]
         if pclass.lower() == "tank":
             self.abilities = [blk_light_01, dmg_light_01, dmg_op_01, dmg_execute_01, dmg_light_02, blk_basic_01]
 
@@ -137,12 +157,13 @@ class Monster(Sprite):
 
         # Both of these ability lists should be exactly 3 items long and contain only Ability classes
         if abilities is not None:
+            self.abilities = abilities
             self.threat_abilities = abilities[0:3]
             self.no_threat_abilities = abilities[3:6]
         else:
-
             self.threat_abilities = [dmg_execute_01, dmg_execute_01, blk_basic_01]
             self.no_threat_abilities = [dmg_light_02, dmg_light_02, dmg_light_02]
+            self.abilities = self.threat_abilities + self.no_threat_abilities
 
         self.AI = sprite_ai.BaseMonsterAI(self)
         self.ThreatManager = sprite_threat.ThreatManager(self)

@@ -1,5 +1,5 @@
 from scripts.Astar import a_star
-from scripts import sprite_class
+from scripts import sprite_classes
 import random
 from scripts import animations
 from scripts.abilities import empty_atk
@@ -33,7 +33,7 @@ class BaseMonsterAI(BaseAI):
 
     def __init__(self, monster, base_path=None):
 
-        if isinstance(monster, sprite_class.Monster):
+        if isinstance(monster, sprite_classes.Monster):
             super().__init__(monster)
         else:
             raise Exception("MonsterAI must be init-ed with Monster class, not {}".format(str(monster)))
@@ -91,7 +91,7 @@ class BaseMonsterAI(BaseAI):
             active_ability = self.sprite.no_threat_abilities[0]
             print("Error using {}'s [{}] ability, reverting to number 1.".format(self.sprite, active_ability))
 
-        if not active_ability.is_in_range(self.sprite, target, grid):
+        if not active_ability.is_usable(self.sprite, target, grid, self.sprite.get_ability_uses(active_ability)):
             active_ability = empty_atk
 
         return active_ability

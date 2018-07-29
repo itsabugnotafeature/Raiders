@@ -197,10 +197,20 @@ class Ability:
         return self.type
 
     def is_in_range(self, attacker, target, grid):
-        # Allows abilities to tell you if the can be used on the target or not
+        # Allows abilities to tell you if the can be used on the target or not based on range
         if len(Astar.a_star(attacker.pos, target.pos, grid)) <= self.range or self.range == -1:
             return True
         return False
+
+    def is_spent(self, num_uses):
+        # Allows abilities to tell you if the can be used on the target or not based on uses
+        if num_uses < self.uses:
+            return True
+        return False
+
+    def is_usable(self, attacker, target, grid, num_uses):
+        # Public method that incorporates all other usability checking methods
+        return self.is_in_range(attacker, target, grid) and self.is_spent(num_uses)
 
 
 # ABILITIES

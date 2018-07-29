@@ -11,7 +11,10 @@ class ChannelManager:
 
     def __init__(self, total_channels=None):
 
+        # Stores the channels
         self.channel_list = []
+
+        # Channels are keyed to the time when they were last used, they begin at the time the ChannelManager initializes
         self.play_time_dict = {}
 
         self.init_channels(total_channels)
@@ -22,6 +25,8 @@ class ChannelManager:
             pygame.mixer.set_num_channels(num_channels)
 
         for channel_id in range(pygame.mixer.get_num_channels()):
+            # Their index will be their ID
+            # TODO: store them as items in a dict, keyed to their id
             self.channel_list.append(pygame.mixer.Channel(channel_id))
 
         for channel in self.channel_list:
@@ -68,3 +73,16 @@ class ChannelManager:
 
     def sort_channel_list(self):
         self.channel_list.sort(key=lambda x: self.play_time_dict[x])
+
+    def stop(self, channel_id, sound=None):
+        channel = self.channel_list[channel_id]
+        if sound is None:
+            channel.stop()
+            print("AUDIO: Stopped playback on channel {}.".format(channel_id))
+        else:
+            if sound == channel.get_sound():
+                channel.stop()
+                print("AUDIO: Stopped playback on channel {}.".format(channel_id))
+
+    def get_sound(self, channel_id):
+        return self.channel_list[channel_id].get_sound()

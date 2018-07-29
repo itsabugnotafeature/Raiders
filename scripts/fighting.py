@@ -1,5 +1,4 @@
 from scripts.variables.localvars import *
-from scripts import animations
 
 
 class FightManager:
@@ -29,9 +28,15 @@ class FightManager:
             self.attacker = self.GameLogic.get_active_sprite()
             self.defender = self.GameLogic.get_active_target()
 
+            self.attacker.prepare_for_fight()
+            self.defender.prepare_for_fight()
+
             self.turn_counter = 1
 
         if event.subtype == ACTION:
+
+            self.attacker.prepare_for_turn()
+            self.defender.prepare_for_turn()
 
             player_attack = self.player.get_attack(self.monster, event.num, self.GameLogic.grid)
             monster_attack = self.monster.get_attack(self.player, self.turn_counter, self.GameLogic.grid)
@@ -41,6 +46,7 @@ class FightManager:
             player_outcome, monster_outcome = self.AbilityAnalyzer.get_outcome(self.player, player_attack,
                                                                                self.monster, monster_attack)
 
+            # TODO: Is this redundant given that the results are calculated order agnostic in the AbilityAnalyzer?
             if self.attacker == self.player:
                 self.player.use(player_attack, self.monster, player_outcome, self.Engine)
                 self.monster.use(monster_attack, self.player, monster_outcome, self.Engine)
