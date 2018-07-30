@@ -7,6 +7,7 @@ class BaseSystem:
 
     def __init__(self):
         self.Engine = None
+        self.game_vars = {}
 
     def set_engine(self, new_engine):
         self.Engine = new_engine

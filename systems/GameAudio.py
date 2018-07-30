@@ -1,22 +1,75 @@
 from scripts.variables.localvars import *
 from systems.BaseSystem import BaseSystem
-from scripts import channel_manager
+import pyaudio
+import wave
 
 
 class GameAudio(BaseSystem):
 
     def __init__(self):
-        self.Engine = None
-        self.game_vars = []
+        super().__init__()
 
-        self.ChannelManager = channel_manager.ChannelManager(8)
+        # Holds all active streams keyed to the open sound file they are reading from, to be released after the stream
+        # finishes
+        self.streams = {}
 
-    def play(self, sound, priority=HIGH):
-        channel_id, queued = self.ChannelManager.play(sound, priority)
-        return channel_id, queued
+        self.AudioPlayer = pyaudio.PyAudio()
 
-    def stop(self, channel_id, sound=None):
-        self.ChannelManager.stop(channel_id, sound)
+    def play(self, wave_file):
 
-    def get_sound(self, channel_id):
-        return self.ChannelManager.get_sound(channel_id)
+        wave_read = wave.open(wave_file, 'rb')
+
+        def callback(in_data, frame_count, time_info, status):
+            data = wave_read.readframes(frame_count)
+            return data, pyaudio.paContinue
+
+        stream = self.AudioPlayer.open(format=self.AudioPlayer.get_format_from_width(wave_read.getsampwidth()),
+                                       channels=wave_read.getnchannels(),
+                                       rate=wave_read.getframerate(),
+                                       output=True,
+                                       stream_callback=callback)
+
+        self.streams[stream] = wave_read
+        stream.start_stream()
+
+        # Returns a unique identifier for this stream so that outside classes can have a way to ID a channel but not
+        # be able to do anything to it
+        return hash(stream)
+
+    def update(self):
+        kill_streams = []
+        for stream in self.streams:
+            if not stream.is_active():
+                kill_streams.append(stream)
+
+        for stream in kill_streams:
+            self.close_stream(stream)
+
+    def close_stream(self, stream):
+        # Close the reading file
+        self.streams[stream].close()
+
+        # Stop thread and close
+        stream.stop_stream()
+        stream.close()
+
+        # Remove stream from stream list
+        self.streams.pop(stream)
+
+        print("AUDIO: Closing stream {}".format(stream))
+
+    def stop(self, stream_hash):
+        # Uses the hash because it is called by outside functions
+        for stream in self.streams:
+            if hash(stream) == stream_hash:
+                self.close_stream(stream)
+                break
+
+    def is_stream_active(self, stream_hash):
+        for stream in self.streams:
+            if hash(stream) == stream_hash:
+                return True
+        return False
+
+    def main_loop(self):
+        self.update()

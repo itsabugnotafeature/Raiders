@@ -6,7 +6,7 @@ class SFXPlayer:
     def __init__(self, sprite):
 
         self.sprite = sprite
-        self.default_ability_sound = pygame.mixer.Sound("sounds/fight/sword_clash.wav")
+        self.default_ability_sound = "sounds/fight/sword_clash.wav"
 
     def use(self, ability, outcome,  audio_player):
 
@@ -33,16 +33,6 @@ class SFXPlayer:
         except TypeError:
             print("AUDIO: No sound found for {}'s {} ability.".format(self.sprite, ability))
 
-    def play_default_sound(self, ability, audio_player):
-        channel_id, queued = audio_player.play(self.default_ability_sound)
-        print("SOUND: Error playing sound for {}'s {} ability, no sound found".format(self.sprite, ability))
-        print("SOUND: Reverting to default sound on channel {}.".format(channel_id))
-
     def play_sound(self, sound, audio_player, ability):
-        channel_id, queued = audio_player.play(sound)
-        if queued:
-            print("AUDIO: Sound for {}'s {} ability queued on channel {}.".format(self.sprite.name, ability,
-                                                                                  channel_id))
-        else:
-            print(("AUDIO: Playing sound for {}'s {} ability on channel {}.".format(self.sprite.name, ability,
-                                                                                    channel_id)))
+        stream_hash = audio_player.play(sound)
+        print(("AUDIO: Playing sound for {}'s {} ability on stream {}.".format(self.sprite.name, ability, stream_hash)))

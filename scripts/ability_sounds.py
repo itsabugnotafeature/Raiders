@@ -15,14 +15,14 @@ class SoundPack:
 
         # Allows all three sounds to be passed as one parameter to an Ability class
 
-        self.success_sound = s_sound
-        self.failure_sound = f_sound
-        self.partial_sound = p_sound
+        self.success_sound_file = s_sound
+        self.failure_sound_file = f_sound
+        self.partial_sound_file = p_sound
 
 
-basic_sword = Sound("sounds/fight/sword_clash.wav")
-eerie_magic = Sound("sounds/fight/eerie_magic.wav")
-block = Sound("sounds/fight/shield_block.wav")
+basic_sword = "sounds/fight/sword_clash.wav"
+eerie_magic = "sounds/fight/eerie_magic.wav"
+block = "sounds/fight/shield_block.wav"
 
 
 snd_basic_atk = SoundPack(basic_sword, None, None)

@@ -404,13 +404,10 @@ class Button:
 
         # Signal that they are about to play
         self.play_sound = False
-        # Signal that a sound is actually playing
-        self.playing_sound = False
-        self.channel_id = None
+        self.stream_hash = None
 
         # TODO: optimize this, they obviously don't need to load the sound individually
-        self.sound = pygame.mixer.Sound("sounds/gui/gui_passover_01.wav")
-        self.sound.set_volume(.4)
+        self.sound_file = "sounds/gui/gui_passover_01.wav"
 
         self.blit_image = self.base_image.copy()
 
@@ -463,19 +460,7 @@ class Button:
     def update(self, engine):
         if self.play_sound:
             self.play_sound = False
-            self.channel_id, queued = engine.Audio.play(self.sound)
-            if not queued:
-                self.playing_sound = True
-        if self.playing_sound:
-            # Handles all ways that the playing_sound state can be exited
-
-            if engine.Audio.get_sound(self.channel_id) != self.sound:
-                self.playing_sound = False
-
-            if not self.state == HOVERED:
-                # Stops audio playback if the mouse move of the button
-                engine.Audio.stop(self.channel_id, self.sound)
-                self.playing_sound = False
+            self.stream_hash = engine.Audio.play(self.sound_file)
 
     def use_action(self):
         if self.action is not None:
@@ -574,9 +559,7 @@ class AbilityButton(Button):
         if self.state == HOVERED:
             pos = pygame.mouse.get_pos()
             make_event(SURFACE, surf=self.prepare_text(self.text), pos=(pos[0], pos[1]-25), z=2)
-        if self.play_sound:
-            self.play_sound = False
-            engine.Audio.play(self.sound)
+        super().update(engine)
 
 
 class DisplayBox:

@@ -152,9 +152,9 @@ class Ability:
         else:
             self.kill_message = "{0} kills {1}!"
 
-        self.s_sound = sound_pack.success_sound
-        self.f_sound = sound_pack.failure_sound
-        self.p_sound = sound_pack.partial_sound
+        self.s_sound = sound_pack.success_sound_file
+        self.f_sound = sound_pack.failure_sound_file
+        self.p_sound = sound_pack.partial_sound_file
 
         self.range = range
 
