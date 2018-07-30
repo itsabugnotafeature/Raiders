@@ -411,8 +411,6 @@ class Button:
 
         self.blit_image = self.base_image.copy()
 
-        self.update_blit_image()
-
     def set_position(self, pos):
         assert isinstance(pos, tuple)
         self.position = pos
@@ -473,13 +471,11 @@ class AbilityButton(Button):
 
     def __init__(self, pos, action_num, ability, theme):
 
-        self.uses = ability.uses
-
-        # TODO: change AbilityButton to parse parameters from Ability class
         super().__init__((pos[0], pos[1], 96, 96), theme, make_event,
                          {"type": FIGHT_EVENT, "subtype": ACTION, "num": action_num}, ability.name,
                          "semi_rounded_gui")
 
+        self.uses = ability.uses
         self.text = ability.name
 
         try:
@@ -487,7 +483,7 @@ class AbilityButton(Button):
         except AttributeError:
             print("GUI_ELEMENTS: No image found for {} ability.".format(ability))
             print("GUI_ELEMENTS: Reverting to default image.")
-            # TODO: fix the error handling here
+            # TODO: fix the error handling here (change the default image to a test image)
             ability_image = None
 
         if ability_image is None:
@@ -499,9 +495,7 @@ class AbilityButton(Button):
             self.base_image.blit(temp_surf, (8, 8))
             self.remove_corners()
 
-        text_image = self.prepare_text(self.text)
-        self.base_image.blit(text_image, ((self.width - self.text_img.get_width()) / 2,
-                                             (self.height-25)))
+        self.update_blit_image()
 
     def remove_corners(self):
         temp_color = self.base_image.get_at((20, 0))

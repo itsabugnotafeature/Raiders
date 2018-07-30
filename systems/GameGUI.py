@@ -45,6 +45,8 @@ class GUI(BaseSystem):
         self.active_highlight.set_colorkey(Color.Black)
         self.active_highlight = pygame.transform.rotate(self.active_highlight, -45)
 
+        self.name_plate_highlight = pygame.transform.scale(self.active_highlight, (12, 12))
+
         self.fight_highlight = pygame.Surface((68, 68), pygame.SRCALPHA)
         self.fight_highlight.fill(Color.with_alpha(100, Color.IndianRed))
         pygame.draw.rect(self.fight_highlight, Color.with_alpha(200, Color.IndianRed), (0, 0, 66, 66), 2)
@@ -173,7 +175,7 @@ class GUI(BaseSystem):
 
             if sprite.fightable:
 
-                self.make_name_plates(sprite)
+                self.make_name_plate(sprite)
 
                 if sprite.health < sprite.maxhealth:
 
@@ -204,13 +206,17 @@ class GUI(BaseSystem):
             pygame.draw.rect(surf, color, (0, 0, health_percentage * surf.get_width(), 10))
         make_event(SURFACE, surf=surf, pos=pos, z=0)
 
-    def make_name_plates(self, sprite):
+    def make_name_plate(self, sprite):
 
         offset = (self.game_vars[BOARD_OFFSET][0] + self.game_vars[GRID_OFFSET][0],
                   self.game_vars[BOARD_OFFSET][1] + self.game_vars[GRID_OFFSET][1])
 
         pos = (sprite.pos[0] * self.game_vars[TILE_SIZE] + offset[0],
                sprite.pos[1] * self.game_vars[TILE_SIZE] + offset[1] - 50)
+
+        if sprite == self.game_vars[ACTIVE_SPRITE]:
+            make_event(SURFACE, surf=self.name_plate_highlight, pos=(pos[0]-12, pos[1]+3), z=1)
+
         make_event(SURFACE, surf=sprite.name_img, pos=pos, z=1)
 
     def make_attacking_tiles(self):
@@ -273,6 +279,7 @@ class GUI(BaseSystem):
                                                          text="Toggle Fullscreen", action=make_event,
                                                          action_kwargs={"type": FLSCRN_TOGGLE}))
         self.pause_gui_addresses.append(len(self.gui_list) - 1)
+        # TODO: use this button for toggling mute
         self.gui_list.append(scripts.gui_elements.Button((x, y + 48 * 4 + 48, BUTTON_WIDTH, 48), self.GUITheme,
                                                          text="(Not Implemented)"))
         self.pause_gui_addresses.append(len(self.gui_list) - 1)
