@@ -1,6 +1,7 @@
 eerie_magic.wav: https://freesound.org/people/RICHERlandTV/sounds/216089/ 
 	converted to .wav at https://audio.online-convert.com/convert-to-wav
 	license: Attribution License
+	edited: with Audacity
 sword_scrape.wav https://freesound.org/people/FunWithSound/sounds/361485/
 	converted to .wav with iTunes
 	license: Attribution License
@@ -9,3 +10,4 @@ sword_clash.wav https://freesound.org/people/FunWithSound/sounds/361482/
 	license: Creative Commons 0
 sheild_block: https://freesound.org/people/nekoninja/sounds/370203/
 	license: Creative Commons 0
+	edited: with Audacity
