@@ -154,14 +154,15 @@ class Monster(Sprite):
         self.speed = 4
         self.health = 20
 
-        # Both of these ability lists should be exactly 3 items long and contain only Ability classes
+        # Both of these ability lists should have only Ability classes,
+        #  and those Ability's should have uses that add to 3
         if abilities is not None:
             self.abilities = abilities
             self.threat_abilities = abilities[0:3]
             self.no_threat_abilities = abilities[3:6]
         else:
-            self.threat_abilities = [dmg_execute_01, dmg_execute_01, blk_basic_01]
-            self.no_threat_abilities = [dmg_light_02, dmg_light_02, dmg_light_02]
+            self.threat_abilities = [dmg_light_02, blk_basic_01]
+            self.no_threat_abilities = [blk_basic_01, dmg_light_02]
             self.abilities = self.threat_abilities + self.no_threat_abilities
 
         self.AI = sprite_ai.BaseMonsterAI(self)

@@ -15,7 +15,7 @@ PRINT_LINE = 26     # Event dict: message="", color=(R, G, B)/(R, G, B, A)
 FIGHT_EVENT = 27    # Event dict: subtype=(any of the sub types listed), kwargs(as listed below)
 """A collection of events related to controlling and monitoring the current fight going on"""
 
-MESSAGE_BANNER = 28     # Event dict: message="", color=(R, G, B)/(R, G, B, A)
+BANNER = 28     # Event dict: banner=scripts.banners.Banner
 """Similar to PRINT_LINE, only this is displayed directly on the screen, not in the textbox"""
 
 FLSCRN_TOGGLE = 29      # Event dict:

@@ -79,18 +79,46 @@ class BaseMonsterAI(BaseAI):
         # Turn numbers start at 1 and go to 3 so we subtract to avoid IndexError
         turn_num -= 1
 
-        try:
-            if target == self.sprite.get_target():
-                active_ability = self.sprite.threat_abilities[turn_num]
-            else:
-                active_ability = self.sprite.no_threat_abilities[turn_num]
-        except IndexError:
+        # Substitute for checking uses, just makes a long list of abilities based on the uses of each ability
+        ability_list = self.make_ability_list((target == self.sprite.get_target()))
 
-            # TODO: let it use abilities with multiple uses
-            active_ability = self.sprite.no_threat_abilities[0]
-            print("Error using {}'s [{}] ability, reverting to number 1.".format(self.sprite, active_ability))
+        # Is the list too short?
+        try:
+            active_ability = ability_list[turn_num]
+        except IndexError:
+            # Make a filler ability
+            active_ability = empty_atk
 
         if not active_ability.is_usable(self.sprite, target, grid, self.sprite.get_ability_uses(active_ability)):
             active_ability = empty_atk
 
         return active_ability
+
+    def make_ability_list(self, threat=False):
+        ability_list = []
+        if threat:
+            for ability in self.sprite.threat_abilities:
+
+                # Handle edge cases
+                if ability.uses == -1 and ability == self.sprite.threat_abilities[-1]:
+                    for i in range(3):
+                        ability_list.append(ability)
+                    break
+                elif ability.uses == -1:
+                    ability_list.append(ability)
+
+                for i in range(ability.uses):
+                    ability_list.append(ability)
+        else:
+            for ability in self.sprite.no_threat_abilities:
+                # Handle edge cases
+                if ability.uses == -1 and ability == self.sprite.no_threat_abilities[-1]:
+                    for i in range(3):
+                        ability_list.append(ability)
+                    break
+                elif ability.uses == -1:
+                    ability_list.append(ability)
+                for i in range(ability.uses):
+                    ability_list.append(ability)
+
+        return ability_list

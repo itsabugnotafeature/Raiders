@@ -55,6 +55,8 @@ class GUI(BaseSystem):
         self.friendly_highlight.fill(Color.with_alpha(100, Color.LightGreen))
         pygame.draw.rect(self.friendly_highlight, Color.with_alpha(200, Color.LightGreen), (0, 0, 66, 66), 2)
 
+        self.banner = None
+
     def set_up(self):
         self.pathing_highlight.convert()
         self.move_highlight.convert()
@@ -77,56 +79,12 @@ class GUI(BaseSystem):
         for sprite in self.game_vars[SPRITE_LIST]:
             sprite.render_name(self.Engine.font, self.GUITheme)
 
-    def is_mouse_on_gui(self):
-        mouse_pos = pygame.mouse.get_pos()
-        for gui in self.gui_list:
-            if scripts.tools.is_in_bounds(mouse_pos, (gui.position[0], gui.position[1],
-                                                      gui.width, gui.height)):
-                return True
-        return False
-
-    def fight_clean_up(self):
-        self.fight_gui_addresses.reverse()
-        for address in self.fight_gui_addresses:
-            self.gui_list.pop(address)
-        self.fight_gui_addresses = []
-
-    def set_engine(self, new_engine):
-        self.Engine = new_engine
-        self.game_vars = new_engine.game_vars
-
-    def init(self, engine):
-        self.set_engine(engine)
-        self.set_up()
-
-    def display_fight_gui(self, player, target):
-        grid = self.Engine.Logic.grid
-        for i in range(len(player.abilities)):
-            ability = player.abilities[i]
-            button_x = 580 + i % 4 * 135
-            button_y = 740 + (int(i / 4)) * 110
-            button = scripts.gui_elements.AbilityButton((button_x, button_y), i, ability, self.GUITheme, player, target, grid)
-
-            self.gui_list.append(button)
-
-            self.fight_gui_addresses.append(len(self.gui_list) - 1)
-
-    def pause_clean_up(self):
-        self.pause_gui_addresses.reverse()
-        for gui in self.pause_gui_addresses:
-            self.gui_list.pop(gui)
-        self.pause_gui_addresses = []
-
     def handle_event(self, event):
         if event.type == FIGHT_EVENT:
             if event.subtype == FIGHT_BEGIN:
                 self.display_fight_gui(event.player, event.monster)
             elif event.subtype == FIGHT_END:
                 self.fight_clean_up()
-
-        if event.type == MESSAGE_BANNER:
-            surf, pos = self.prepare_message_banner(event)
-            make_event(SURFACE, surf=surf, pos=pos, z=3)
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
@@ -137,6 +95,9 @@ class GUI(BaseSystem):
                         self.gui_list[address].handle_event(event)
                 else:
                     self.pause_clean_up()
+
+        if event.type == BANNER:
+            self.banner = event.banner
 
         if not self.game_vars[PAUSE]:
             for gui in self.gui_list:
@@ -180,6 +141,10 @@ class GUI(BaseSystem):
         for address in self.fight_gui_addresses + self.base_gui_addresses:
             gui = self.gui_list[address]
             make_event(SURFACE, surf=gui.render(), pos=gui.position, z=1)
+
+        if self.banner is not None:
+            self.update_blit_banner()
+
         if self.game_vars[PAUSE]:
             for address in self.pause_gui_addresses:
                 gui = self.gui_list[address]
@@ -282,12 +247,6 @@ class GUI(BaseSystem):
                                                          text="(Not Implemented)"))
         self.pause_gui_addresses.append(len(self.gui_list) - 1)
 
-    def prepare_message_banner(self, event):
-
-        temp_surf = self.GUITheme.font.render(event.message, False, event.color)
-        pos = ((self.Engine.window_width - temp_surf.get_width()) / 2, 50)
-        return temp_surf, pos
-
     def dehover_guis(self):
         for gui in self.gui_list:
             if isinstance(gui, scripts.gui_elements.Button) and gui.state != DISABLED:
@@ -312,3 +271,48 @@ class GUI(BaseSystem):
                   active_pos[1] * 80 + self.game_vars[BOARD_OFFSET][1]
                   + self.game_vars[GRID_OFFSET][1] + center_offset[1])
         make_event(SURFACE, surf=self.active_highlight.render(), pos=offset, z=0)
+
+    def is_mouse_on_gui(self):
+        mouse_pos = pygame.mouse.get_pos()
+        for gui in self.gui_list:
+            if scripts.tools.is_in_bounds(mouse_pos, (gui.position[0], gui.position[1],
+                                                      gui.width, gui.height)):
+                return True
+        return False
+
+    def fight_clean_up(self):
+        self.fight_gui_addresses.reverse()
+        for address in self.fight_gui_addresses:
+            self.gui_list.pop(address)
+        self.fight_gui_addresses = []
+
+    def set_engine(self, new_engine):
+        self.Engine = new_engine
+        self.game_vars = new_engine.game_vars
+
+    def init(self, engine):
+        self.set_engine(engine)
+        self.set_up()
+
+    def display_fight_gui(self, player, target):
+        grid = self.Engine.Logic.grid
+        for i in range(len(player.abilities)):
+            ability = player.abilities[i]
+            button_x = 580 + i % 4 * 135
+            button_y = 740 + (int(i / 4)) * 110
+            button = scripts.gui_elements.AbilityButton((button_x, button_y), i, ability, self.GUITheme, player, target, grid)
+
+            self.gui_list.append(button)
+
+            self.fight_gui_addresses.append(len(self.gui_list) - 1)
+
+    def pause_clean_up(self):
+        self.pause_gui_addresses.reverse()
+        for gui in self.pause_gui_addresses:
+            self.gui_list.pop(gui)
+        self.pause_gui_addresses = []
+
+    def update_blit_banner(self):
+        make_event(SURFACE, surf=self.banner.render(), pos=self.banner.pos, z=2)
+        # If it has more to do it returns itself, otherwise it returns None
+        self.banner = self.banner.update(self.Engine)

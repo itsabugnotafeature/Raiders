@@ -128,11 +128,9 @@ class GameEngine:
 
             if event.type == FIGHT_EVENT:
                 self.Logic.handle_event(event)
+                self.GUI.handle_event(event)
                 if event.subtype == FIGHT_BEGIN:
                     self.game_vars[GAME_STATE] = IN_FIGHT
-                    self.GUI.handle_event(event)
-                if event.subtype == FIGHT_END:
-                    self.GUI.handle_event(event)
 
             if event.type == PRINT_LINE:
                 # Is it a command?
@@ -141,7 +139,7 @@ class GameEngine:
                 else:
                     self.GUI.handle_event(event)
 
-            if event.type == MESSAGE_BANNER:
+            if event.type == BANNER:
                 self.GUI.handle_event(event)
 
             if event.type == FLSCRN_TOGGLE:

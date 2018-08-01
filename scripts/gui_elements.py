@@ -464,7 +464,7 @@ class Button:
         if self.action is not None:
             self.action(**self.action_kwargs)
         else:
-            make_event(MESSAGE_BANNER, message="Not Implemented Yet from " + str(hash(self)), color=Color.Red)
+            make_event(BANNER, message="Not Implemented Yet from " + str(hash(self)), color=Color.Red)
 
 
 class AbilityButton(Button):
@@ -516,16 +516,17 @@ class AbilityButton(Button):
             if self.uses > 0 and self.in_bounds(event.pos):
                 self.update_uses()
         if event.type == pygame.KEYDOWN:
-            if int(pygame.key.name(event.key))-1 == self.action_kwargs['num'] and self.state != DISABLED:
-                # The left side is the number that the event represents, adjusted by one because the abilities are 0
-                # indexed but to the users, using the 0th ability is weird.
-                self.use_action()
+            if event.key in [pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6, pygame.K_7]:
+                if int(pygame.key.name(event.key))-1 == self.action_kwargs['num'] and self.state != DISABLED:
+                    # The left side is the number that the event represents, adjusted by one because the abilities are 0
+                    # indexed but to the users, using the 0th ability is weird.
+                    self.use_action()
+        if event.type == FIGHT_EVENT:
+            if not self.is_usable():
+                self.state = DISABLED
 
     def update_blit_image(self):
         self.blit_image = self.base_image.copy()
-
-        if not self.is_usable():
-            self.state = DISABLED
 
         if self.state == HOVERED:
             temp_surf = pygame.Surface((self.width, self.height), pygame.SRCALPHA)

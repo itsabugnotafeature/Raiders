@@ -8,6 +8,7 @@ from scripts import tools
 from systems.BaseSystem import BaseSystem
 from scripts import pathing
 from scripts import fighting
+from scripts import banners
 
 
 class Logic(BaseSystem):
@@ -100,7 +101,9 @@ class Logic(BaseSystem):
                                                       self.game_vars[TILE_SIZE]*8,
                                                       self.game_vars[TILE_SIZE]*8)):
                         if not self.Engine.GUI.is_mouse_on_gui():
-                            make_event(PRINT_LINE, message="That is not a valid spot, try again.", color=Color.Red)
+                            banner = banners.Banner("That is not a valid spot, try again.",
+                                                    (self.Engine.window_width, self.Engine.window_height))
+                            make_event(BANNER, banner=banner)
 
         if self.game_vars[GAME_STATE] == MOVING:
 
