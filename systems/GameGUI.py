@@ -105,9 +105,7 @@ class GUI(BaseSystem):
             ability = player.abilities[i]
             button_x = 580 + i % 4 * 135
             button_y = 740 + (int(i / 4)) * 110
-            button = scripts.gui_elements.AbilityButton((button_x, button_y), i, ability, self.GUITheme)
-            if not player.is_ability_usable(ability, target, grid):
-                button.state = DISABLED
+            button = scripts.gui_elements.AbilityButton((button_x, button_y), i, ability, self.GUITheme, player, target, grid)
 
             self.gui_list.append(button)
 
@@ -122,9 +120,6 @@ class GUI(BaseSystem):
     def handle_event(self, event):
         if event.type == FIGHT_EVENT:
             if event.subtype == FIGHT_BEGIN:
-                self.display_fight_gui(event.player, event.monster)
-            if event.subtype == ACTION:
-                self.fight_clean_up()
                 self.display_fight_gui(event.player, event.monster)
             elif event.subtype == FIGHT_END:
                 self.fight_clean_up()
@@ -142,6 +137,7 @@ class GUI(BaseSystem):
                         self.gui_list[address].handle_event(event)
                 else:
                     self.pause_clean_up()
+
         if not self.game_vars[PAUSE]:
             for gui in self.gui_list:
                 gui.handle_event(event)
@@ -266,7 +262,6 @@ class GUI(BaseSystem):
         BUTTON_WIDTH = 400
         x = (self.Engine.window_width - BUTTON_WIDTH) / 2
         y = 150
-        # TODO: make a subclass for pause buttons
         self.gui_list.append(scripts.gui_elements.Button((x, y + 48, BUTTON_WIDTH, 48), self.GUITheme,
                                                          text="Unpause", action=make_event,
                                                          action_kwargs={"type": pygame.KEYDOWN, "key": pygame.K_ESCAPE}))

@@ -9,7 +9,7 @@ class SpriteAnimator:
 
     def use(self, ability, outcome, animator):
 
-        # TODO: give each ability an AnimationPack, but also give every sprite a default s/f/p AnimationPack
+        # TODO: give each ability an AnimationPack, but also give every sprite a default AnimationPack
         try:
             if outcome["blocked"]:
                 print("ANIMATION: Attempted to play blocked animation for {}.".format(self.sprite))

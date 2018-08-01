@@ -406,7 +406,6 @@ class Button:
         self.play_sound = False
         self.stream_hash = None
 
-        # TODO: optimize this, they obviously don't need to load the sound individually
         self.sound_file = "sounds/gui/gui_passover_01.wav"
 
         self.blit_image = self.base_image.copy()
@@ -439,10 +438,6 @@ class Button:
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONUP:
             if self.in_bounds(event.pos) and self.state != DISABLED:
-                try:
-                    print("GUI_ELEMENTS: Button '{}' created event of type {}.".format(str(hash(self)), str(self.action_kwargs["type"])))
-                except KeyError:
-                    print("GUI ELEMENTS: Error parsing event type.")
                 self.use_action()
         elif event.type == pygame.MOUSEMOTION:
             if self.in_bounds(event.pos) and self.state != DISABLED:
@@ -461,6 +456,11 @@ class Button:
             self.stream_hash = engine.Audio.play(self.sound_file)
 
     def use_action(self):
+        try:
+            print("GUI_ELEMENTS: Button '{}' created event of type {}.".format(str(hash(self)),
+                                                                               str(self.action_kwargs["type"])))
+        except KeyError:
+            print("GUI ELEMENTS: Error parsing event type.")
         if self.action is not None:
             self.action(**self.action_kwargs)
         else:
@@ -469,7 +469,9 @@ class Button:
 
 class AbilityButton(Button):
 
-    def __init__(self, pos, action_num, ability, theme):
+    # The action_num argument is the index of the ability in the corresponding player's ability list
+
+    def __init__(self, pos, action_num, ability, theme, player, target, grid):
 
         super().__init__((pos[0], pos[1], 96, 96), theme, make_event,
                          {"type": FIGHT_EVENT, "subtype": ACTION, "num": action_num}, ability.name,
@@ -477,6 +479,8 @@ class AbilityButton(Button):
 
         self.uses = ability.uses
         self.text = ability.name
+
+        self.is_usable = lambda: player.is_ability_usable(player.abilities[action_num], target, grid)
 
         try:
             ability_image = ability.image
@@ -507,15 +511,22 @@ class AbilityButton(Button):
         pygame.draw.rect(self.base_image, temp_color, (width-12, width-12, 4, 4))
 
     def handle_event(self, event):
+        super().handle_event(event)
         if event.type == pygame.MOUSEBUTTONUP:
-            super().handle_event(event)
             if self.uses > 0 and self.in_bounds(event.pos):
                 self.update_uses()
-        else:
-            super().handle_event(event)
+        if event.type == pygame.KEYDOWN:
+            if int(pygame.key.name(event.key))-1 == self.action_kwargs['num'] and self.state != DISABLED:
+                # The left side is the number that the event represents, adjusted by one because the abilities are 0
+                # indexed but to the users, using the 0th ability is weird.
+                self.use_action()
 
     def update_blit_image(self):
         self.blit_image = self.base_image.copy()
+
+        if not self.is_usable():
+            self.state = DISABLED
+
         if self.state == HOVERED:
             temp_surf = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
             self.blit_image.blit(self.prepare_text(self.uses), (self.width - 18, 18))

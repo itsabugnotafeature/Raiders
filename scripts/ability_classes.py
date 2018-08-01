@@ -261,8 +261,6 @@ class MeleeAttack(Ability):
         super().__init__(name, actions, flags, uses, k_message, sound_pack, range)
         self.type = "melee"
 
-    # TODO: add logic for if it can reach or not, similar to Block's can_block method
-
 
 class conditional_melee_attack(Ability):
 

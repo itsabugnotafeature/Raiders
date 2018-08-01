@@ -1,5 +1,6 @@
 import GameEngine
 import pygame
+from scripts.variables.localvars import *
 
 
 pygame.mixer.init()
@@ -13,6 +14,9 @@ pygame.scrap.init()
 pygame.scrap.set_mode(pygame.SCRAP_CLIPBOARD)
 
 Engine = GameEngine.GameEngine(main_window)
+
+if __name__ != '__main__':
+    Engine.game_vars[FULL_SCREEN] = False
 
 
 while True:

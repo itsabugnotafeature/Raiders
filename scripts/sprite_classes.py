@@ -67,7 +67,6 @@ class Sprite:
             return False
 
     def use(self, active_ability, target, outcome, engine):
-        # TODO: support for blocking abilities, if the ability is blocked do the blocked logic in the ability
         if outcome["death_blocked"]:
             make_event(PRINT_LINE, message="{} can't attack while dead.".format(self.name), color=Color.DarkRed)
         else:

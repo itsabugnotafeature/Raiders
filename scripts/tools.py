@@ -156,6 +156,8 @@ def outline_square(surface, color, width):
 
 
 def center_offset(inner_dims, outer_dims):
+    # Returns the coordinates where the inner surface should be blitted to, in order for it to be centered on the outer
+    # surface
 
     return (outer_dims[0] - inner_dims[0]) / 2, (outer_dims[1] - inner_dims[1]) / 2
 

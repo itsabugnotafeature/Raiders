@@ -298,7 +298,6 @@ class Logic(BaseSystem):
                 self.player_loop()
             elif self.active_sprite.type == "monster":
                 self.monster_loop()
-                # TODO Finish game logic
 
     def get_active_sprite(self):
         return self.active_sprite

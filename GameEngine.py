@@ -75,13 +75,6 @@ class GameEngine:
             if event.type == pygame.QUIT:
                 self.game_vars[QUIT_SEQUENCE] = True
 
-            # TODO: fix video resizing then add the RESIZEABLE flag back into the full/windowed toggler
-            # if event.type == pygame.VIDEORESIZE and not self.game_vars[FULL_SCREEN]:
-            #     self.display_window = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
-            #     self.window_height = event.h
-            #     self.window_width = event.w
-            #     self.GUI.handle_event(event)
-
             if event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:
                     self.game_vars[MOUSE_CLICKED] = True
@@ -125,9 +118,6 @@ class GameEngine:
                     self.Renderer.handle_event(event)
                 else:
                     self.GUI.handle_event(event)
-                if event.key in [pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6, pygame.K_7]:
-                    if self.game_vars[GAME_STATE] == IN_FIGHT:
-                        make_event(FIGHT_EVENT, subtype=ACTION, num=int(pygame.key.name(event.key))-1)
 
             if event.type == pygame.KEYUP:
                 self.GUI.handle_event(event)

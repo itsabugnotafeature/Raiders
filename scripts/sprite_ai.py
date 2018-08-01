@@ -76,7 +76,6 @@ class BaseMonsterAI(BaseAI):
 
     # Ability_pos should always be the turn number
     def get_attack(self, target, turn_num, grid):
-        # TODO: consider making a SpriteAnimator class that the AI can delegate animation tasks to
         # Turn numbers start at 1 and go to 3 so we subtract to avoid IndexError
         turn_num -= 1
 

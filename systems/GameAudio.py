@@ -46,17 +46,15 @@ class GameAudio(BaseSystem):
             self.close_stream(stream)
 
     def close_stream(self, stream):
-        # Close the reading file
+        # Close the file being read from
         self.streams[stream].close()
 
-        # Stop thread and close
+        # Stop thread and close stream
         stream.stop_stream()
         stream.close()
 
         # Remove stream from stream list
         self.streams.pop(stream)
-
-        print("AUDIO: Closing stream {}".format(stream))
 
     def stop(self, stream_hash):
         # Uses the hash because it is called by outside functions
