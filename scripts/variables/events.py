@@ -29,4 +29,14 @@ RESET = 3           # Used for control, lets you rewind turns // kwargs(rewind_a
 
 
 def make_event(type, **kwargs):
-    pygame.event.post(pygame.event.Event(type, **kwargs))
+    event = pygame.event.Event(type, **kwargs)
+    pygame.event.post(event)
+    return event
+
+
+def make_dummy_event(type, **kwargs):
+
+    # Works like make_event but doesn't atually post the event, just returns a dummy event to be passed through
+    # event_handlers
+    event = pygame.event.Event(type, **kwargs)
+    return event

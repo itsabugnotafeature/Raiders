@@ -22,8 +22,15 @@ class Renderer(BaseSystem):
         self.surf_dict2 = {}
         # Surfaces in this are blitted after the pause screen
         self.surf_dict3 = {}
+        # Surfaces in this are always blitted and updated
+        self.surf_dict4 = {}
 
-        self.surf_dict_list = [self.surf_dict0, self.surf_dict1, self.surf_dict2, self.surf_dict3]
+        # Make sure this contains all surf_dicts
+        self.surf_dict_list = [self.surf_dict0, self.surf_dict1, self.surf_dict2, self.surf_dict3, self.surf_dict4]
+
+        # Prevents surfaces from tearing on the screen during pause menu by holding all rects from all surfaces in
+        # surf_dict4
+        self.surf_dict4_copy = []
 
         self.cursor_img = pygame.Surface((31, 27))
         self.cursor_img.blit(pygame.image.load("graphics//gui_images//cursor.png"), (0, 0))
@@ -54,7 +61,6 @@ class Renderer(BaseSystem):
         self.background_img.fill(Color.Wheat)
         self.background_img.blit(self.terrain, self.game_vars[BOARD_OFFSET])
 
-
     def set_engine(self, new_engine):
         self.Engine = new_engine
         self.game_vars = new_engine.game_vars
@@ -75,6 +81,7 @@ class Renderer(BaseSystem):
                 self.pause_flagged = True
             else:
                 self.paused = False
+                self.surf_dict4_copy.clear()
 
         if event.type == FLSCRN_TOGGLE:
             self.Engine.display_window.blit(self.pause_frame, (0, 0))
@@ -128,7 +135,12 @@ class Renderer(BaseSystem):
                     self.Engine.display_window.blit(surf, spot)
                     self.count_blit()
 
-        # To account for the mouse blit, which comes after and therfore can't be logged normally
+        for surf in self.surf_dict4:
+            for spot in self.surf_dict4[surf]:
+                self.Engine.display_window.blit(surf, spot)
+                self.count_blit()
+
+        # To account for the mouse blit, which comes after and therefore can't be logged normally
         self.count_blit()
 
         if self.game_vars[DEBUG]:
@@ -136,12 +148,10 @@ class Renderer(BaseSystem):
 
         self.Engine.display_window.blit(self.cursor_img, pygame.mouse.get_pos())
 
-        self.surf_dict0.clear()
-        self.surf_dict1.clear()
-        self.surf_dict2.clear()
-        self.surf_dict3.clear()
-
         self.update_screen()
+
+        for surf_dict in self.surf_dict_list:
+            surf_dict.clear()
 
     def do_pause_screencap(self):
         self.Engine.display_window.fill(Color.Wheat)
@@ -208,12 +218,14 @@ class Renderer(BaseSystem):
         if not self.paused:
             pygame.display.flip()
         else:
-            width = (self.Engine.window_width - 400) / 2
-            pygame.display.update((width, 0, 400, self.Engine.window_height))
+            x_pos = (self.Engine.window_width - 400) / 2
+            pygame.display.update((x_pos, 0, 400, self.Engine.window_height))
             mousex, mousey = pygame.mouse.get_pos()
-            pygame.display.update((mousex-150, mousey-150, 300, 300))
+            pygame.display.update((mousex-150, mousey-100, 300, 200))
             if self.game_vars[DEBUG]:
                 pygame.display.update((0, 0, 300, 250))
+            for rect in self.surf_dict4_copy:
+                pygame.display.update(rect)
 
     def count_blit(self):
         self.bpf += 1
@@ -228,3 +240,8 @@ class Renderer(BaseSystem):
             self.surf_dict_list[eventz][surface] = [pos]
         else:
             self.surf_dict_list[eventz][surface] += [pos]
+            
+        if eventz == 4:
+            rect = (pos[0], pos[1], surface.get_width(), surface.get_height())
+            if rect not in self.surf_dict4_copy:
+                self.surf_dict4_copy.append(rect)

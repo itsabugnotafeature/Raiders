@@ -5,13 +5,16 @@ from scripts.variables.localvars import *
 
 class Banner:
 
-    def __init__(self, text, screen_dims, hang_time=5, theme=None, color=Color.Red):
+    def __init__(self, text, hang_time=5, theme=None, color=Color.Red):
         # Displays a text banner at the top of the screen and fades it out after time
 
         font = pygame.font.SysFont("lucidaconsole", 18, True)
         self.blit_img = font.render(text, False, color)
 
         self.width, self.height = self.blit_img.get_width(), self.blit_img.get_height()
+
+        screen = pygame.display.get_surface()
+        screen_dims = (screen.get_width(), screen.get_height())
 
         self.pos = ((screen_dims[0]-self.width)/2, 40)
 
@@ -22,11 +25,7 @@ class Banner:
         # How long the banner will hang on the screen
         self.hang_time = hang_time
 
-        self.opacity = 255
-
     def render(self):
-        self.blit_img.set_alpha(self.opacity)
-        self.blit_img.convert()
         return self.blit_img
 
     def update(self, engine):

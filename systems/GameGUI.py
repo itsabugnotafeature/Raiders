@@ -56,6 +56,7 @@ class GUI(BaseSystem):
         pygame.draw.rect(self.friendly_highlight, Color.with_alpha(200, Color.LightGreen), (0, 0, 66, 66), 2)
 
         self.banner = None
+        self.DisplayBox = None
 
     def set_up(self):
         self.pathing_highlight.convert()
@@ -95,16 +96,22 @@ class GUI(BaseSystem):
                         self.gui_list[address].handle_event(event)
                 else:
                     self.pause_clean_up()
+                    self.quit_confirm_clean_up()
 
         if event.type == BANNER:
             self.banner = event.banner
 
         if not self.game_vars[PAUSE]:
+
+            # Make sure that if it is active, only the DisplayBox receives updates
             for gui in self.gui_list:
                 gui.handle_event(event)
         else:
-            for address in self.pause_gui_addresses:
-                self.gui_list[address].handle_event(event)
+            if self.DisplayBox is None:
+                for address in self.pause_gui_addresses:
+                    self.gui_list[address].handle_event(event)
+            else:
+                self.DisplayBox.handle_event(event)
 
     def main_loop(self):
         if self.game_vars[GAME_STATE] == PATHING:
@@ -112,9 +119,6 @@ class GUI(BaseSystem):
                 self.make_pathing_highlight()
                 self.make_highlight_tile()
                 self.make_active_tile(self.Engine)
-
-        for gui in self.gui_list:
-            gui.update(self.Engine)
 
         if self.game_vars[GAME_STATE] == ATTACKING:
             if self.Engine.Logic.active_sprite.type == "player":
@@ -138,6 +142,12 @@ class GUI(BaseSystem):
 
                     self.make_health_bars(sprite)
 
+        if self.DisplayBox is None:
+            for gui in self.gui_list:
+                gui.update(self.Engine)
+        else:
+            self.DisplayBox.update(self.Engine)
+
         for address in self.fight_gui_addresses + self.base_gui_addresses:
             gui = self.gui_list[address]
             make_event(SURFACE, surf=gui.render(), pos=gui.position, z=1)
@@ -146,6 +156,8 @@ class GUI(BaseSystem):
             self.update_blit_banner()
 
         if self.game_vars[PAUSE]:
+            if self.DisplayBox is not None:
+                make_event(SURFACE, surf=self.DisplayBox.render(), pos=self.DisplayBox.position, z=4)
             for address in self.pause_gui_addresses:
                 gui = self.gui_list[address]
                 make_event(SURFACE, surf=gui.render(), pos=gui.position, z=3)
@@ -232,8 +244,7 @@ class GUI(BaseSystem):
                                                          action_kwargs={"type": pygame.KEYDOWN, "key": pygame.K_ESCAPE}))
         self.pause_gui_addresses.append(len(self.gui_list) - 1)
         self.gui_list.append(scripts.gui_elements.Button((x, y + 48 * 2 + 16, BUTTON_WIDTH, 48), self.GUITheme,
-                                                         text="Quit", action=make_event,
-                                                         action_kwargs={"type": pygame.QUIT}))
+                                                         text="Quit", action=self.display_quit_confirm))
         self.pause_gui_addresses.append(len(self.gui_list) - 1)
         self.gui_list.append(scripts.gui_elements.Button((x, y + 48 * 3 + 32, BUTTON_WIDTH, 48), self.GUITheme,
                                                          text="Toggle Fullscreen", action=make_event,
@@ -301,6 +312,7 @@ class GUI(BaseSystem):
             button_x = 580 + i % 4 * 135
             button_y = 740 + (int(i / 4)) * 110
             button = scripts.gui_elements.AbilityButton((button_x, button_y), i, ability, self.GUITheme, player, target, grid)
+            button.update_usability()
 
             self.gui_list.append(button)
 
@@ -313,6 +325,17 @@ class GUI(BaseSystem):
         self.pause_gui_addresses = []
 
     def update_blit_banner(self):
-        make_event(SURFACE, surf=self.banner.render(), pos=self.banner.pos, z=2)
+        make_event(SURFACE, surf=self.banner.render(), pos=self.banner.pos, z=4)
         # If it has more to do it returns itself, otherwise it returns None
         self.banner = self.banner.update(self.Engine)
+
+    def display_quit_confirm(self):
+        gui_elements = [
+            scripts.gui_elements.Button((0, 0, 150, 40), self.GUITheme, text="Yes", action=make_event,
+                                        action_kwargs={"type": pygame.QUIT}),
+            scripts.gui_elements.Button((0, 0, 150, 40), self.GUITheme, text="No", action=self.quit_confirm_clean_up)
+        ]
+        self.DisplayBox = scripts.gui_elements.DisplayBox(gui_elements, title="Are you sure?")
+
+    def quit_confirm_clean_up(self):
+        self.DisplayBox = None
