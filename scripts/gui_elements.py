@@ -662,16 +662,18 @@ class DisplayBox:
         return return_surface
 
     def init_dimensions(self):
+        # Save the gui widths
+        width_list = []
+
         for gui in self.gui_list:
 
             # Set width as total of internal guis widths
             self.width += gui.width
+            width_list.append(gui.width)
 
             # Set height to the height of the tallest gui
             if gui.height > self.height:
                 self.height = gui.height
-        # Save the width of the guis
-        gui_width = self.width
 
         # Add a little padding to the box
         self.width *= 1.5
@@ -679,11 +681,15 @@ class DisplayBox:
         self.width = int(self.width)
         self.height = int(self.height)
 
-        x_padding = (self.width - gui_width) / (len(self.gui_list) + 1)
-        # Store the places where each gui will be blitted
-        x_pos_list = [x_padding]
-        for gui in self.gui_list:
-            x_pos_list += [int(gui.width+x_padding)]
+        x_padding = (self.width - sum(width_list)) / (len(self.gui_list)+1)
+        x_padding = int(x_padding)
+        # Store the position of guis
+        x_pos_list = []
+        counter = x_padding
+
+        for width in width_list:
+            x_pos_list.append(counter)
+            counter += x_padding + width
         counter = 0
         for gui in self.gui_list:
             gui.position = (x_pos_list[counter], int((self.height - gui.height)/2)+10)
