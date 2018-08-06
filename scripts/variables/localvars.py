@@ -32,6 +32,7 @@ FRIENDLY_FIRE = 14
 TYPING = 15
 GRID_OFFSET = 16
 FULL_SCREEN = 17
+MUTE = 18
 
 # All input events.py past this
 RMOUSE_POS = 33
@@ -62,10 +63,3 @@ HOVERED = 1
 DISABLED = 2
 SELECTED = 4
 BASE_STATE = 5
-
-"""
-Priorities for GameAudio
-"""
-LOW = 0
-MEDIUM = 1
-HIGH = 2

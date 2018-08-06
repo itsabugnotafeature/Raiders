@@ -18,6 +18,5 @@ Engine = GameEngine.GameEngine(main_window)
 if __name__ != '__main__':
     Engine.game_vars[FULL_SCREEN] = False
 
-
 while True:
     Engine.update()

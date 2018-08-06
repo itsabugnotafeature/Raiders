@@ -13,10 +13,11 @@ class BaseSystem:
         self.Engine = new_engine
 
     def set_up(self):
-        pass
+        self.game_vars = self.Engine.game_vars
 
     def init(self, engine):
-        pass
+        self.set_engine(engine)
+        self.set_up()
 
     def main_loop(self):
         pass

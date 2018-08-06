@@ -30,7 +30,7 @@ class GameEngine:
             scripts.sprite_classes.Monster("Infernus", "tank", "tank.png", (1, 1))
         ], PAUSE: False, QUIT_SEQUENCE: False, GAME_STATE: TURN_RESET, SCROLL_DOWN: False, SCROLL_UP: False,
             MOUSE_CLICKED: False, SKIP_SEQUENCE: False, FRIENDLY_FIRE: False, TYPING: False, DEBUG: True,
-            GRID_OFFSET: (0, -30), FULL_SCREEN: True
+            GRID_OFFSET: (0, -30), FULL_SCREEN: True, MUTE: False,
         }
         # Using the keyword arguments
         for key, value in kwargs:
@@ -152,6 +152,15 @@ class GameEngine:
                     self.display_window = pygame.display.set_mode((self.window_width, self.window_height))
 
                 self.Renderer.handle_event(event)
+
+            if event.type == VAR_CHANGE:
+                if event.toggle:
+                    self.game_vars[event.key] = not self.game_vars[event.key]
+                else:
+                    self.game_vars[event.key] = event.value
+
+                if event.key == MUTE:
+                    self.Audio.handle_event(event)
 
     def update(self):
         self.main_loop()

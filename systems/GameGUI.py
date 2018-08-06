@@ -250,9 +250,10 @@ class GUI(BaseSystem):
                                                          text="Toggle Fullscreen", action=make_event,
                                                          action_kwargs={"type": FLSCRN_TOGGLE}))
         self.pause_gui_addresses.append(len(self.gui_list) - 1)
-        # TODO: use this button for toggling mute
         self.gui_list.append(scripts.gui_elements.Button((x, y + 48 * 4 + 48, BUTTON_WIDTH, 48), self.GUITheme,
-                                                         text="(Not Implemented)"))
+                                                         text="Toggle Mute", action=make_event,
+                                                         action_kwargs={"type": VAR_CHANGE, "key": MUTE,
+                                                                        "toggle": True}))
         self.pause_gui_addresses.append(len(self.gui_list) - 1)
         self.gui_list.append(scripts.gui_elements.Button((x, y + 48 * 5 + 64, BUTTON_WIDTH, 48), self.GUITheme,
                                                          text="(Not Implemented)"))

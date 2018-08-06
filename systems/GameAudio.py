@@ -12,10 +12,13 @@ class GameAudio(BaseSystem):
         # Holds all active streams keyed to the open sound file they are reading from, to be released after the stream
         # finishes
         self.streams = {}
+        self.paused = False
 
         self.AudioPlayer = pyaudio.PyAudio()
 
     def play(self, wave_file):
+        if self.paused:
+            return -1
 
         wave_read = wave.open(wave_file, 'rb')
 
@@ -37,6 +40,7 @@ class GameAudio(BaseSystem):
         return hash(stream)
 
     def update(self):
+
         kill_streams = []
         for stream in self.streams:
             if not stream.is_active():
@@ -71,3 +75,21 @@ class GameAudio(BaseSystem):
 
     def main_loop(self):
         self.update()
+
+    def pause_streams(self):
+        for stream in self.streams:
+            stream.stop_stream()
+
+    def unpause_streams(self):
+        for stream in self.streams:
+            stream.start_stream()
+
+    def handle_event(self, event):
+        if event.type == VAR_CHANGE:
+            if event.key == MUTE:
+                if self.paused:
+                    self.paused = False
+                    self.unpause_streams()
+                else:
+                    self.paused = True
+                    self.pause_streams()
