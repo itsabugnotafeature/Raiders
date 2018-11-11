@@ -6,12 +6,9 @@ from scripts.variables.localvars import *
 pygame.mixer.init()
 
 pygame.init()
-<<<<<<< HEAD
 
 main_window = pygame.display.set_mode(pygame.display.list_modes()[0], pygame.FULLSCREEN)
-=======
 main_window = pygame.display.set_mode(pygame.display.list_modes()[2])
->>>>>>> monster_ai
 pygame.display.set_caption("Raiders")
 
 pygame.scrap.init()
