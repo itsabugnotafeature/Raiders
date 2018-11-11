@@ -30,11 +30,7 @@ class GameEngine:
             scripts.sprite_classes.Monster("Infernus", "tank", "tank.png", (1, 1))
         ], PAUSE: False, QUIT_SEQUENCE: False, GAME_STATE: TURN_RESET, SCROLL_DOWN: False, SCROLL_UP: False,
             MOUSE_CLICKED: False, SKIP_SEQUENCE: False, FRIENDLY_FIRE: False, TYPING: False, DEBUG: True,
-<<<<<<< HEAD
-            GRID_OFFSET: (0, -30), FULL_SCREEN: False, MUTE: False
-=======
-            GRID_OFFSET: (0, -30), FULL_SCREEN: False
->>>>>>> monster_ai
+            GRID_OFFSET: (0, -30), FULL_SCREEN: False, MUTE: False,
         }
         # Using the keyword arguments
         for key, value in kwargs:
