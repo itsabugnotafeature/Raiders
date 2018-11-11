@@ -33,6 +33,7 @@ class GameEngine:
 <<<<<<< HEAD
             GRID_OFFSET: (0, -30), FULL_SCREEN: False, MUTE: False
 =======
+            GRID_OFFSET: (0, -30), FULL_SCREEN: False
 >>>>>>> monster_ai
         }
         # Using the keyword arguments
