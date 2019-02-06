@@ -6,6 +6,8 @@ import pygame
 from scripts.Colors import Color
 import random
 import math
+from sys import platform as _platform
+
 
 def tup_round(tuple, digits=0):
     return round(tuple[0], digits), round(tuple[1], digits)
@@ -162,3 +164,12 @@ def center_offset(inner_dims, outer_dims):
     return (outer_dims[0] - inner_dims[0]) / 2, (outer_dims[1] - inner_dims[1]) / 2
 
 
+def os_format_dir_name(dir_name):
+    if _platform == "linux" or _platform == "linux2":
+        return dir_name.format(os_dir='/')
+    elif _platform == "darwin":
+        return dir_name.format(os_dir='/')
+    elif _platform == "win32":
+        return dir_name.format(os_dir='\\')
+    elif _platform == "win64":
+        return dir_name.format(os_dir='\\')

@@ -1,6 +1,6 @@
 import pygame
 import ast
-
+from scripts.tools import os_format_dir_name
 
 class GUIComponents:
 
@@ -60,7 +60,7 @@ def load_gui_from_image(file_name):
     background_dimensions = (0, 0, 1, 1)
 
     try:
-        component_image = pygame.image.load("graphics//gui_images//" + file_name + ".png")
+        component_image = pygame.image.load(os_format_dir_name("graphics{os_dir}gui_images{os_dir}") + file_name + ".png")
 
         with open("graphics//gui_images//" + file_name + "_dimensions.txt") as dimensions_file:
             current_line = dimensions_file.readline()

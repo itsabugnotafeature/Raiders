@@ -1,4 +1,5 @@
 import pygame
+from scripts.tools import os_format_dir_name
 
 
 class SFXPlayer:
@@ -6,7 +7,7 @@ class SFXPlayer:
     def __init__(self, sprite):
 
         self.sprite = sprite
-        self.default_ability_sound = "sounds/fight/sword_clash.wav"
+        self.default_ability_sound = os_format_dir_name("sounds{os_dir}fight{os_dir}sword_clash.wav")
 
     def use(self, ability, outcome,  audio_player):
 

@@ -1,5 +1,6 @@
 from pygame.mixer import Sound
 import pygame
+from scripts.tools import os_format_dir_name
 
 
 """
@@ -20,9 +21,9 @@ class SoundPack:
         self.partial_sound_file = p_sound
 
 
-basic_sword = "sounds/fight/sword_clash.wav"
-eerie_magic = "sounds/fight/eerie_magic.wav"
-block = "sounds/fight/shield_block.wav"
+basic_sword = os_format_dir_name("sounds{os_dir}fight{os_dir}sword_clash.wav")
+eerie_magic = os_format_dir_name("sounds{os_dir}fight{os_dir}eerie_magic.wav")
+block = os_format_dir_name("sounds{os_dir}fight{os_dir}shield_block.wav")
 
 
 snd_basic_atk = SoundPack(basic_sword, None, None)

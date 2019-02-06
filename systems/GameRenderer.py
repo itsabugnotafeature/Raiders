@@ -2,6 +2,7 @@ from scripts.variables.localvars import *
 import scripts.map_engine
 from scripts.Colors import Color
 import scripts.tools
+from scripts.tools import os_format_dir_name
 from systems.BaseSystem import BaseSystem
 
 
@@ -11,7 +12,7 @@ class Renderer(BaseSystem):
         self.Engine = None
         self.game_vars = {}
         
-        self.mapname = "maps//Elemental_plane.map"
+        self.mapname = os_format_dir_name("maps{os_dir}Elemental_plane.map")
         self.terrain = scripts.map_engine.Map_Engine.load_map(self.mapname)
 
         # Surfaces in this are blitted before the sprites
@@ -33,7 +34,7 @@ class Renderer(BaseSystem):
         self.surf_dict4_copy = []
 
         self.cursor_img = pygame.Surface((31, 27))
-        self.cursor_img.blit(pygame.image.load("graphics//gui_images//cursor.png"), (0, 0))
+        self.cursor_img.blit(pygame.image.load(os_format_dir_name("graphics{os_dir}gui_images{os_dir}cursor.png")), (0, 0))
         self.cursor_img.set_colorkey(Color.Red)
 
         self.background_img = None
