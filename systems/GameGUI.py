@@ -310,8 +310,9 @@ class GUI(BaseSystem):
         grid = self.Engine.Logic.grid
         for i in range(len(player.abilities)):
             ability = player.abilities[i]
-            button_x = 580 + i % 4 * 135
-            button_y = 740 + (int(i / 4)) * 110
+            screen_size = pygame.display.get_surface().get_size()
+            button_x = screen_size[0] - 580 + i % 4 * 135
+            button_y = screen_size[1] - 220 + i // 4 * 110
             button = scripts.gui_elements.AbilityButton((button_x, button_y), i, ability, self.GUITheme, player, target, grid)
             button.update_usability()
 
