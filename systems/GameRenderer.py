@@ -74,7 +74,10 @@ class Renderer(BaseSystem):
 
     def handle_event(self, event):
         if event.type == SURFACE:
-            self.add_surface(event.surf, event.pos, event.z)
+            try:
+                self.add_surface(event.surf, event.pos, event.z)
+            except AttributeError as e:
+                print("Invalid surface event")
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE and self.game_vars[PAUSE]:
@@ -237,10 +240,10 @@ class Renderer(BaseSystem):
         # This adds the the surf and pos to the appropriate list in the dict,
         # or if there is no list, it makes a new one.
         # The surf is the key to a list of positions where it is to be blitted to
-        if not self.surf_dict_list[eventz].get(surface):
+        if self.surf_dict_list[eventz].get(surface) is None:
             self.surf_dict_list[eventz][surface] = [pos]
         else:
-            self.surf_dict_list[eventz][surface] += [pos]
+            self.surf_dict_list[eventz][surface].append([pos])
             
         if eventz == 4:
             rect = (pos[0], pos[1], surface.get_width(), surface.get_height())

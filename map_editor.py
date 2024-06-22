@@ -80,7 +80,7 @@ pygame.display.set_caption("Map Editor")
 clock = pygame.time.Clock()
 
 
-txt_font = pygame.font.Font("C:\\Windows\\Fonts\\Verdana.ttf", 20)
+txt_font = pygame.font.Font(None, 20)
 
 mouse_pos = 0
 mouse_x, mouse_y = 0, 0

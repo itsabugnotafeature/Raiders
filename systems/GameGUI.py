@@ -1,3 +1,4 @@
+from xml.dom.minidom import Attr
 import scripts.gui_elements
 import scripts.tools
 from scripts.Colors import Color
@@ -99,7 +100,10 @@ class GUI(BaseSystem):
                     self.quit_confirm_clean_up()
 
         if event.type == BANNER:
-            self.banner = event.banner
+            try:
+                self.banner = event.banner
+            except AttributeError as e:
+                print("Invalid banner event")
 
         if not self.game_vars[PAUSE]:
 
